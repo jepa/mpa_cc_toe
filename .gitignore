@@ -39,4 +39,4 @@ vignettes/*.pdf
 .Renviron
 
 # Larger-than-usual data
-./Data/WDPA_WDOECM_Jul2022_Public_marine_shp/*
+./Data/WDPA_WDOECM_Jul2022_Public_marine_shp/
