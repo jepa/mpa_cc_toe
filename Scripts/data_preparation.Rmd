@@ -6,6 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include = F}
+source(here::here('./Functions/function_list.R'))
 
 load_pkg(c(
   # For grid estimation and species selection
@@ -21,48 +22,50 @@ sf::sf_use_s2(use_s2 = FALSE)
 
 ```
 
+# Identify grids that are MPAs or surrounding an MPA
 
-#MPA coastal and marine 
-load the data into R 
+## Load the data into R 
 
-```{r}
-MPA1 <- read_sf(here("./Data/spatial/WDPA_WDOECM_Jul2022_Public_marine_shp/WDPA_WDOECM_Jul2022_Public_marine_shp_0/WDPA_WDOECM_Jul2022_Public_marine_shp-polygons.shp"))
+```{r load_data}
+MPA1 <- read_sf(here("./Data/Spatial/WDPA_WDOECM_Jul2022_Public_marine_shp/WDPA_WDOECM_Jul2022_Public_marine_shp_0/WDPA_WDOECM_Jul2022_Public_marine_shp-polygons.shp"))
 #plot(MPA1)
 
 MPA2 <- read_sf(here("./Data/spatial/WDPA_WDOECM_Jul2022_Public_marine_shp/WDPA_WDOECM_Jul2022_Public_marine_shp_1/WDPA_WDOECM_Jul2022_Public_marine_shp-polygons.shp"))
 
 MPA3 <- read_sf(here("./Data/spatial/WDPA_WDOECM_Jul2022_Public_marine_shp/WDPA_WDOECM_Jul2022_Public_marine_shp_2/WDPA_WDOECM_Jul2022_Public_marine_shp-polygons.shp"))
 
-MPA <- dplyr::bind_rows(list(MPA1, MPA2, MPA3))
+mpa_sf <- dplyr::bind_rows(list(MPA1, MPA2, MPA3))
 crs <- "+init=epsg:4326"
 
 ```
 
-#dissolve so that they are not overlapping 
-This is necessary for the area calculation 
-Here is where you would select out just the Marine (2 or the marine and coastal, 2 and 1)
-You can also select out just the no take here. 
+## Dissolve so that they are not overlapping 
+This is necessary for the area calculation. Here is where you would select out just the Marine (2 or the marine and coastal, 2 and 1). You can also select out just the no take here. 
+
 ```{r}
-MPA$to_dissolve <- "A"
 
-MPA_dissolve <- MPA %>% group_by(to_dissolve) %>% summarize()
-MPA_dissolve <- st_transform(MPA_dissolve, crs = st_crs(crs))
+mpa_sf$to_dissolve <- "A"
 
+mpa_dissolve <- mpa_sf %>% 
+  group_by(to_dissolve) %>% 
+  summarize() %>% 
+  st_transform(crs = st_crs(crs))
+  
 
 #ggplot() + geom_sf(data = MPA, aes(fill = NO_TAKE)) + 
   #geom_sf(data = MPA_dissolve, fill = NA, colour = "red")
 ```
 
-##which gridcells overlap with an MPA (and what is the area of that gridcell that contains and MPA)
+## which gridcells overlap with an MPA (and what is the area of that gridcell that contains and MPA)
 
 ```{r}
-grid <- read_sf(here("./Data/spatial/worldsq_EA.shp"))
-
-#convert grid coordinate system to be same as lat long WGS_1984
-grid <- st_transform(grid, crs = st_crs(crs))
+# Load grid
+grid <- read_sf(here("./Data/spatial/worldsq_EA.shp")) %>% 
+  # convert grid coordinate system to be same as lat long WGS_1984
+  st_transform(grid, crs = st_crs(crs))
 
 #this tells you which gridcells intersect with an MPA and what area of the gridcell is covered 
-grid_intersection <- st_intersection(grid, MPA_dissolve) %>% 
+grid_intersection <- st_intersection(grid, mpa_dissolve) %>% 
   group_by(Seq) %>% 
   summarise(geom = st_union(geometry)) %>%
   mutate(geom = st_sfc(geom),
