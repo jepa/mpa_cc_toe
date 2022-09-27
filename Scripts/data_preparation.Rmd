@@ -181,6 +181,7 @@ intr <- as.data.frame(intr)
 intr <- intr[colnames(intr) %in% names]
 
 pt <- rbind(as.data.frame(intr), as.data.frame(grid_MPA))
+pt <- pt %>% distinct()
 
 gridpoints <- gridpoints[colnames(gridpoints) %in% c("Seq","Lon", "Lat")]
 
