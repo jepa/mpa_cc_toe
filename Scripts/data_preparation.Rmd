@@ -48,7 +48,7 @@ This is necessary for the area calculation
 Here is where you would select out just the Marine (2 or the marine and coastal, 2 and 1)
 You can also select out just the no take here. 
 ```{r}
-
+beg<- Sys.time()
 MPA$to_dissolve <- "A"
 MPA_dissolve <- MPA %>% group_by(to_dissolve) %>% summarize()
 MPA_dissolve <- st_transform(MPA_dissolve, crs = st_crs(crs))
@@ -61,6 +61,11 @@ Mode <- function(x) {
  ux[which.max(tabulate(match(x, ux)))]
 }
 
+end<- Sys.time()
+
+end-beg
+# 2.51 hours
+
 ```
 
 ##which gridcells overlap with an MPA 
@@ -70,28 +75,38 @@ Mode <- function(x) {
 grid <- read_sf(here("./Data/spatial/worldsq_EA.shp"))
 
 #convert grid coordinate system to be same as lat long WGS_1984
-grid <- st_transform(grid, crs = st_crs(crs))
+grid <- st_transform(grid, crs = st_crs(crs)) %>% 
+  filter(PWater > 0)
 
 #this tells you which gridcells intersect with an MPA and what area of the gridcell is covered 
-grid_intersection <- st_intersection(grid, MPA_dissolve) %>% 
-  group_by(Seq) %>% 
+grid_intersection <- st_intersection(grid, MPA_dissolve) %>%
+  group_by(Seq) %>%
   summarise(geom = st_union(geometry)) %>%
   mutate(geom = st_sfc(geom),
-         area = st_area(geom))
+area = st_area(geom))
+
+# write_sf(grid_intersection, here("./Data/grid_intersection.shp"))
+
+
+
 #rm(MPA_dissolve2)
 grid_intersection$status <- "protected" #lets us know that those grid cells have some level of MPA wiithin them 
 
 #join this back to the big grid (right now we just have the gridIDs that are overlapping an MPA)
 grid_intersection_2 <- as.data.frame(grid_intersection)
+# write.csv(grid_intersection_2, "grid_intersection_2.csv")
+
+# Load data that takes for ever to make
+# grid_intersection_2 <- read_csv(here("Scripts/grid_intersection_2.csv")) %>% 
+  # mutate(as.numeric(Seq))
+# View(grid_intersection_2)
+
 grid2 <- as.data.frame(grid)
 grid2 <- left_join(grid2, grid_intersection_2, by = "Seq")
 grid2$protected_area_m2  <- as.numeric(grid2$area)
 grid2 <- grid2 %>% dplyr::select(-geom)
 grid3 <- grid2
 grid2 <- st_as_sf(grid2)
-
-
-
 
 # ggplot() + geom_sf(subset(grid2, grid2$status == "protected"), mapping = aes(fill = protected_area_m2))+ geom_sf(grid_intersection, mapping = aes(colour = "red"))
 
@@ -111,6 +126,7 @@ grid_sp <- st_as_sf(gridpoints, coords = c("long", "lat"), crs = st_crs(crs))
 
 #figure out surrounding grids 
 ```{r}
+
 grid_sp_MPA <- grid_sp %>% dplyr::filter(status == "protected")
 #st_crs(grid_sp_MPA) <- NA
 grid_sp_no_MPA <- grid_sp %>% dplyr::filter(is.na(status))
@@ -120,13 +136,15 @@ grid_MPA <- gridpoints %>% dplyr::filter(status == "protected")
 grid_no_MPA <- gridpoints %>% dplyr::filter(is.na(status))
 
 ```
+
 ##proportion calculation 
 realocate grid cells that are MPA to the surrounding cells (depending on size of MPA )
 Problem is the MPA data has a bunch of overlapping feautres so we dissolved earlier 
 now we need to assign every contiguous MPA grid cell a unique group ID 
 ```{r}
 
-grid_final_sp <- st_as_sf(gridpoints, coords = c("Lon", "Lat"), crs = st_crs(crs))
+
+grid_final_sp <- st_as_sf(gridpoints, coords = c("long", "lat"), crs = st_crs(crs))
 
 grid_sp_MPA_poly <- grid_final_sp %>% 
   st_make_grid(cellsize = .5) %>% 
@@ -135,11 +153,13 @@ grid_sp_MPA_poly <- grid_final_sp %>%
 
 # ggplot() + geom_sf(grid_sp_MPA, mapping = aes(colour = "point"))+ geom_sf(grid_sp_MPA_poly, mapping = aes(colour = "grid")) 
 
+
 touching_list = st_touches(grid_sp_MPA_poly) 
 
 g = graph.adjlist(touching_list)
 c = components(g)
 grid_sp_MPA_poly$groups = c$membership
+
 
 # ggplot() + geom_sf(grid_sp_MPA_poly, mapping = aes(colour = as.factor(groups)))
 
@@ -164,8 +184,20 @@ intr$status <- "surrounding"
 
 intr <- intr %>% add_count(groups) %>% mutate("prop" = (1/n) + 1) #this is the gridcell with an MPA that they are closest to 
 
+end<- Sys.time()
+
+end-beg
 
 ```
+
+```{r}
+
+write_csv(grid_MPA,"grid_MPA.csv")
+write_csv(gridpoints,"gridpoints.csv")
+
+
+```
+
 
 
 #### Clean up the dataset 
@@ -178,6 +210,8 @@ names <- c("Seq", "Lat", "Lon", "area", "status", "prop", "protected_area_m2")
 
 grid_MPA <- grid_MPA[colnames(grid_MPA) %in% names]
 intr <- as.data.frame(intr)
+# write_csv(intr,"intr.csv")
+
 intr <- intr[colnames(intr) %in% names]
 
 pt <- rbind(as.data.frame(intr), as.data.frame(grid_MPA))
@@ -188,8 +222,14 @@ gridpoints <- gridpoints[colnames(gridpoints) %in% c("Seq","Lon", "Lat")]
 grid_final <- left_join(gridpoints, pt, by = c("Seq","Lon", "Lat"))
 grid_final <- grid_final %>% distinct() #some of the 
 
-#grid_final %>% dplyr::filter(status %in% c("protected", "surrounding")) %>% ggplot() + geom_point(aes(x = Lon, y = Lat, colour = as.factor(prop)))
+grid_final %>% dplyr::filter(status %in% c("protected","surrounding")) %>%
+  ggplot() + 
+  geom_tile(aes(x = Lon,
+                y = Lat,
+                colour = prop
+                )
+            )
 
-write.csv(grid_final, here("./Data/mpa_scenarios/grid_all_mpas.csv"))
+write.csv(grid_final, here("./Data/grid_all_mpas.csv"))
 ```
 
