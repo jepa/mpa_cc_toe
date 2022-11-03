@@ -177,16 +177,27 @@ intr$status <- "surrounding"
 # ggplot() + geom_sf(buffer, mapping = aes(colour = "buffer")) + geom_sf(subset(grid2, grid2$status == "protected"), mapping = aes(fill = protected_area_m2))+ geom_sf(grid_intersection, mapping = aes(colour = "MPA")) + geom_sf(intr, mapping = aes(colour = as.factor(groups)))
 
 
-
-
-
 #now do the proportion calculation
 
-intr <- intr %>% add_count(groups) %>% mutate("prop" = (1/n) + 1) #this is the gridcell with an MPA that they are closest to 
+grid_sp_MPA <- grid_sp_MPA %>% add_count(groups)
+grid_sp_MPA$mpa_n <- grid_sp_MPA$n
+grid_sp_MPA1 <- as.data.frame(grid_sp_MPA) %>% dplyr::select(groups, mpa_n) %>% ungroup() %>% distinct()
 
-end<- Sys.time()
+intr <- left_join(intr, grid_sp_MPA1, by = "groups")
 
-end-beg
+# Proportion is estimated as the number of total protected cells by MPA over the surrounding ones
+intr <- intr %>% add_count(groups) %>% mutate("prop" = ((mpa_n/n)/100) + 1) #this is the gridcell with an MPA that they are closest to
+
+# Test plot
+# ggplot(intr) +
+#   geom_tile(
+#     aes(
+#       x = Lon,
+#       y = Lat,
+#       fill = prop,
+#       color = prop
+#     )
+#   )
 
 ```
 
