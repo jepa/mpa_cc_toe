@@ -176,7 +176,7 @@ grid_sp_MPA1 <- as.data.frame(grid_sp_MPA) %>% dplyr::select(groups, mpa_n) %>% 
 
 intr <- left_join(intr, grid_sp_MPA1, by = "groups")
 
-intr <- intr %>% add_count(groups) %>% mutate("prop" = ((mpa_n/n)/100) + 1) #this is the gridcell with an MPA that they are closest to 
+intr <- intr %>% add_count(groups) %>% mutate("prop" = ((mpa_n/n)) + 1) #this is the total number of gridcells within one continuous MPA/total number of grid cells surrounding that MPA 
 
 
 ```
