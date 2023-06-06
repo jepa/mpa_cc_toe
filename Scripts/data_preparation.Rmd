@@ -28,12 +28,12 @@ select <- dplyr::select
 ## load the data into R 
 
 ```{r}
-MPA1 <- read_sf(here("./Data/Spatial/WDPA_WDOECM_Jul2022_Public_marine_shp/WDPA_WDOECM_Jul2022_Public_marine_shp_0/WDPA_WDOECM_Jul2022_Public_marine_shp-polygons.shp"))
+MPA1 <- read_sf("/Users/sarahroberts/Documents/ClimateOceanPlanning/R/mpa_cc_toe_old/Data/Spatial/WDPA_WDOECM_Jul2022_Public_marine_shp/WDPA_WDOECM_Jul2022_Public_marine_shp_0/WDPA_WDOECM_Jul2022_Public_marine_shp-polygons.shp")
 #plot(MPA1)
 
-MPA2 <- read_sf(here("./Data/Spatial/WDPA_WDOECM_Jul2022_Public_marine_shp/WDPA_WDOECM_Jul2022_Public_marine_shp_1/WDPA_WDOECM_Jul2022_Public_marine_shp-polygons.shp"))
+MPA2 <- read_sf(here("/Users/sarahroberts/Documents/ClimateOceanPlanning/R/mpa_cc_toe_old/Data/Spatial/WDPA_WDOECM_Jul2022_Public_marine_shp/WDPA_WDOECM_Jul2022_Public_marine_shp_1/WDPA_WDOECM_Jul2022_Public_marine_shp-polygons.shp"))
 
-MPA3 <- read_sf(here("./Data/Spatial/WDPA_WDOECM_Jul2022_Public_marine_shp/WDPA_WDOECM_Jul2022_Public_marine_shp_2/WDPA_WDOECM_Jul2022_Public_marine_shp-polygons.shp"))
+MPA3 <- read_sf("/Users/sarahroberts/Documents/ClimateOceanPlanning/R/mpa_cc_toe_old/Data/Spatial/WDPA_WDOECM_Jul2022_Public_marine_shp/WDPA_WDOECM_Jul2022_Public_marine_shp_2/WDPA_WDOECM_Jul2022_Public_marine_shp-polygons.shp")
 
 MPA <- dplyr::bind_rows(list(MPA1, MPA2, MPA3))
 crs <- "+init=epsg:4326"
@@ -41,7 +41,11 @@ crs <- "+init=epsg:4326"
 
 rm(MPA1, MPA2, MPA3)
 
+MPA <- MPA %>% sample_frac(.02)
 
+MPA1 <- read_sf("/Users/sarahroberts/Documents/mpa_ubc_project/Data/Coastal_Marine_in27.shp")
+#plot(MPA1)
+MPA1 <- MPA1 %>% dplyr::filter(MARINE == 2)
 ```
 
 #dissolve so that they are not overlapping 
@@ -84,12 +88,10 @@ grid_intersection <- st_intersection(grid, MPA_dissolve) %>%
   group_by(Seq) %>%
   summarise(geom = st_union(geometry)) %>%
   mutate(geom = st_sfc(geom),
-area = st_area(geom))
-
-# write_sf(grid_intersection, here("./Data/grid_intersection.shp"))
+         area = st_area(geom))
 
 
-
+grid <- grid 
 #rm(MPA_dissolve2)
 grid_intersection$status <- "protected" #lets us know that those grid cells have some level of MPA wiithin them 
 
@@ -161,8 +163,8 @@ g = graph.adjlist(touching_list)
 c = components(g)
 grid_sp_MPA_poly$groups = c$membership
 
-
-# ggplot() + geom_sf(grid_sp_MPA_poly, mapping = aes(colour = as.factor(groups)))
+cols = rainbow(314, s=.6, v=.9)[sample(1:314,314)] 
+ggplot() + geom_sf(grid_sp_MPA_poly, mapping = aes(colour = as.factor(groups)))+ scale_colour_manual(values=cols)+ theme(legend.position="none")
 
 #join that back to the grid_sp_MPA
 grid_sp_MPA_poly <- as.data.frame(grid_sp_MPA_poly) %>% dplyr::select(Seq, groups)
@@ -175,7 +177,7 @@ intr <- st_intersection(grid_sp_no_MPA, buffer, sparse = F)
 intr <- intr[colnames(intr) %in% c(colnames(grid_sp_no_MPA), "groups")]
 intr$status <- "surrounding"
 
-# ggplot() + geom_sf(buffer, mapping = aes(colour = "buffer")) + geom_sf(subset(grid2, grid2$status == "protected"), mapping = aes(fill = protected_area_m2))+ geom_sf(grid_intersection, mapping = aes(colour = "MPA")) + geom_sf(intr, mapping = aes(colour = as.factor(groups)))
+ggplot() + geom_sf(buffer, mapping = aes(colour = "buffer")) + geom_sf(subset(grid2, grid2$status == "protected"), mapping = aes(fill = protected_area_m2))+ geom_sf(grid_intersection, mapping = aes(colour = "MPA")) + geom_sf(intr, mapping = aes(colour = as.factor(groups)))
 
 
 #now do the proportion calculation
@@ -186,26 +188,7 @@ grid_sp_MPA1 <- as.data.frame(grid_sp_MPA) %>% dplyr::select(groups, mpa_n) %>% 
 
 intr <- left_join(intr, grid_sp_MPA1, by = "groups")
 
-# Proportion is estimated as the number of total protected cells by MPA over the surrounding ones
-intr <- intr %>% add_count(groups) %>% mutate("prop" = ((mpa_n/n)/100) + 1) #this is the gridcell with an MPA that they are closest to
-
-# Test plot
-# ggplot(intr) +
-#   geom_tile(
-#     aes(
-#       x = Lon,
-#       y = Lat,
-#       fill = prop,
-#       color = prop
-#     )
-#   )
-
-```
-
-```{r}
-
-write_csv(grid_MPA,"grid_MPA.csv")
-write_csv(gridpoints,"gridpoints.csv")
+intr <- intr %>% add_count(groups) %>% mutate("prop" = ((mpa_n/n)) + 1) #this is the total number of gridcells within one continuous MPA/total number of grid cells surrounding that MPA 
 
 
 ```
