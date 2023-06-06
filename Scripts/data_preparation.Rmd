@@ -19,6 +19,7 @@ load_pkg(c(
 # Fix new updates of sf package
 sf::sf_use_s2(use_s2 = FALSE)
 
+select <- dplyr::select
 
 ```
 
@@ -114,8 +115,8 @@ grid2 <- st_as_sf(grid2)
 
 #we can join back to the gridPoints file for the next step 
 gridpoints <- read.csv(here("./Data/Lon_Lat_DBEM.txt"), header = FALSE)
-colnames(gridpoints) <- c("Seq", "long", "lat")
-gridpoints <- left_join(gridpoints, grid3, by = "Seq")
+colnames(gridpoints) <- c("Seq", "Lon", "Lat")
+gridpoints <- left_join(gridpoints, grid3, by = c("Seq","Lat","Lon"))
 
 # ggplot() +
 #   geom_point(data = subset(gridpoints, gridpoints$status == "protected"), aes(x = Lon, y = Lat), size = .2, colour = "red") 
@@ -228,7 +229,10 @@ intr <- intr[colnames(intr) %in% names]
 pt <- rbind(as.data.frame(intr), as.data.frame(grid_MPA))
 pt <- pt %>% distinct()
 
-gridpoints <- gridpoints[colnames(gridpoints) %in% c("Seq","Lon", "Lat")]
+# gridpointsb <- gridpoints[colnames(gridpoints) %in% c("Seq","Lon", "Lat")]
+
+gridpoints <- gridpoints %>% 
+  dplyr::select(Seq,Lon,Lat)
 
 grid_final <- left_join(gridpoints, pt, by = c("Seq","Lon", "Lat"))
 grid_final <- grid_final %>% distinct() #some of the 
@@ -241,6 +245,79 @@ grid_final %>% dplyr::filter(status %in% c("protected","surrounding")) %>%
                 )
             )
 
-write.csv(grid_final, here("./Data/grid_all_mpas.csv"))
+# write.csv(grid_final, here("./Data/grid_all_mpas.csv"))
+```
+
+
+### Estimate area
+
+
+```{r}
+
+ # 1.2 Estimate gridcell area based on global variables (m^2)
+# Degree ressolution for area estimation
+# https://rdrr.io/github/stineb/rbeni/src/R/area.R
+# https://www.pmel.noaa.gov/maillists/tmap/ferret_users/fu_2004/msg00023.html
+# https://www.engr.scu.edu/~emaurer/tools/calc_cell_area_cgi.pl
+
+r_earth <- 6371000 # NASA's volumetric mean radious https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html
+res_lon <- 0.5 # lon degree resolution
+res_lat <- 0.5 # lat degree resolution
+
+grid_final_area <-
+  grid_final %>%
+    janitor::clean_names() %>% 
+  mutate(
+    grid_area = (4 * r_earth^2 * 0.5 * res_lon * pi/180 * cos(abs(lat) * pi/180 ) * sin(0.5 * res_lat * pi/180)),
+    prop = ifelse(status == "protected", protected_area_m2/grid_area, prop),
+    prop = replace_na(prop,0)
+  ) 
+
+
+write.csv(grid_final_area, here("./Data/grid_all_mpas.csv"))
+
+  ggplot(grid_final_area) +
+    geom_histogram(aes(x = prop))
+    
+grid_final_area %>% 
+  ggplot() +
+  geom_tile(
+    aes(
+      x = lon,
+      y = lat,
+      fill = prop
+    )
+  )
+
+
+```
+
+## Prepare grid data for DBEM
+
+In the DBEM, MPA algorithm works as a multiplier of fishing effort so protected areas should = 0 fo fishing effort, regardless of what it is in that cell, is 0. 
+
+```{r}
+# Load all MPAs dataset
+grid_all_mpas <- read_csv("Data/grid_all_mpas.csv")
+
+
+mpa_index <- grid_all_mpas %>% 
+  # fix numerical mismatch
+  mutate(
+    status = ifelse(is.na(status),"open",status),
+    prop = ifelse(status == "open",1,
+                  ifelse(status == "protected" & prop >= 1,0,
+                         ifelse(status == "protected" & prop < 1,1-prop,prop)
+                  )
+    )
+  ) %>% 
+  select(prop)
+  
+name <- paste0(here("Data/mpa_scenarios/mpa_index"),".txt")
+write.table(mpa_index, file=name, sep="\t", col.names = F, row.names = F)
+
+
+# mpa_index.txt Sent to Compute Canada on June 2023
+
 ```
 
