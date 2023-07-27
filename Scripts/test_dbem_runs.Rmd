@@ -1,0 +1,151 @@
+---
+title: "dbem_test_runs"
+author: "Juliano Palacios"
+date: "25/07/2023"
+output: pdf_document
+---
+
+
+```{r setup, include = F}
+source(here::here('./Functions/function_list.R'))
+
+load_pkg(c(
+  # For data wrangling
+  "tidyverse",
+  "janitor",
+  # For collaborative ease
+  "here",
+  # for spatial analysis
+  "sf"
+  ))
+
+# For grid e
+# Fix new updates of sf package
+sf::sf_use_s2(use_s2 = FALSE)
+
+select <- dplyr::select
+
+```
+
+
+# Test first run batch
+
+We ran 40 speices using the GFDL26 Pre Industrial with F1 and the MPA grid (RC6GFDLPIF1MPA)
+
+```{r test_initial_runs}
+
+# Read species list
+exploited_species_list <- read.csv("/Volumes/Enterprise/Data/SAU/exploited_species_list.csv")
+
+# Read runs
+runs <- list.files("/Volumes/Enterprise/Data/toe_mpa/dbem_runs/RC6GFDLPIF1MPA",full.names = T)
+
+# MPA grid
+grid_mpa <- read_csv("~/GutHub/mpa_cc_toe/Data/grid_all_mpas.csv") %>% 
+  select(index = Seq,
+         status,
+         prop) %>% 
+  mutate(status = ifelse(is.na(status),"open",status))
+
+# DBEM coordinates
+
+coods_dbem <- MyFunctions::my_path("Spa",extra_path = "DBEM", name = "Lon_Lat_DBEM.txt",system = "juliano", read = T)
+
+for(i in 1:length(runs)){
+  # i = 1 
+  
+  # Select data and variables 
+  data_to_load <- runs[i]
+  # str_length(data_to_load)
+  taxon_key <- str_sub(data_to_load,59,64)
+  taxon_name <- exploited_species_list %>% 
+    filter(TaxonKey == taxon_key) %>% 
+    pull(CommonName)
+  var <- str_sub(data_to_load,65,67)
+  file_name <- paste0(taxon_key,"_",var)
+  
+  load(data_to_load)
+  
+  colnames(data) <- seq(1851,1950,1)
+  
+  # First make a time series of the data
+  
+  
+  linear_data <-
+    data %>% 
+    as.data.frame() %>%
+    bind_cols(grid_mpa) %>% 
+    # names()
+    pivot_longer(
+      cols = starts_with("1"),
+      names_to = "year",
+      values_to = "value") %>% 
+    mutate(year = as.numeric(year)) %>% 
+    filter(!is.na(value)) %>% 
+    group_by(year,status) %>% 
+    summarise(mean = mean(value,na.rm = T),
+              max = max(value,na.rm = T),
+              min = min(value,na.rm = T)
+    ) %>% 
+    pivot_longer(
+      cols = starts_with("m"),
+      names_to = "variable",
+      values_to = "value")
+  
+  
+  p <-linear_data %>% 
+    ggplot + 
+    geom_line(
+      aes(
+        x = year,
+        y = value,
+        color = status
+      )
+    ) +
+    facet_wrap(~variable,
+               scales = "free",
+               ncol = 1) +
+    ggtitle(paste(taxon_key,taxon_name,var))
+  
+    ggsave(paste0("../Results/Test/tl_",taxon_key,"_",taxon_name,"_",var,".png"),
+           p)
+  
+  
+  #### now Map
+    
+  m <- data %>% 
+    as.data.frame() %>%
+    select(`1855`,`1900`,`1949`) %>% 
+    bind_cols(grid_mpa) %>% 
+    pivot_longer(
+      cols = starts_with("1"),
+      names_to = "year",
+      values_to = "value") %>% 
+    mutate(year = as.numeric(year)) %>% 
+    filter(!is.na(value)) %>% 
+    left_join(coods_dbem) %>% 
+    ggplot() +
+    geom_tile(
+      aes(
+        x = lon,
+        y = lat,
+        fill = value,
+        color = value,
+      )
+    ) +
+    # geom_sf(data = rnaturalearth::ne_countries(scale = 'large', returnclass = c("sf")),aes()) +
+    facet_wrap(~year, ncol = 1) +
+    scale_fill_viridis_b() +
+    scale_color_viridis_b() +
+    coord_map()
+    
+  ggsave(paste0("../Results/Test/gm_",taxon_key,"_",taxon_name,"_",var,".png"),
+         m)
+  
+}
+
+```
+
+
+```
+
