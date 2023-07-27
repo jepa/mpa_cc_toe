@@ -281,7 +281,7 @@ In the DBEM, MPA algorithm works as a multiplier of fishing effort so protected 
 
 ```{r}
 # Load all MPAs dataset
-grid_all_mpas <- read_csv("Data/grid_all_mpas.csv")
+grid_all_mpas <- read_csv("../Data/grid_all_mpas.csv")
 
 
 mpa_index <- grid_all_mpas %>% 
@@ -296,7 +296,7 @@ mpa_index <- grid_all_mpas %>%
   ) %>% 
   select(prop)
   
-name <- paste0(here("Data/mpa_scenarios/mpa_index"),".txt")
+name <- paste0(here("Data/mpa_index"),".txt")
 write.table(mpa_index, file=name, sep="\t", col.names = F, row.names = F)
 
 
