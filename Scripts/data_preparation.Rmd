@@ -257,7 +257,7 @@ grid_final_area <-
   )
 
 
-write.csv(grid_final_area, here("./Data/grid_all_mpas.csv"))
+write.csv(grid_final_area, here("./Data/grid_all_mpas_b.csv"))
 
   ggplot(grid_final_area) +
     geom_histogram(aes(x = prop))
