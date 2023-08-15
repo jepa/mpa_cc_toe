@@ -248,16 +248,16 @@ res_lon <- 0.5 # lon degree resolution
 res_lat <- 0.5 # lat degree resolution
 
 grid_final_area <-
-  grid_final %>%
+  grid_mpas %>%
     janitor::clean_names() %>% 
   mutate(
     grid_area = (4 * r_earth^2 * 0.5 * res_lon * pi/180 * cos(abs(lat) * pi/180 ) * sin(0.5 * res_lat * pi/180)),
     prop = ifelse(status == "protected", protected_area_m2/grid_area, prop),
     prop = replace_na(prop,0)
-  ) 
+  )
 
 
-write.csv(grid_final_area, here("./Data/grid_all_mpas.csv"))
+write.csv(grid_final_area, here("./Data/grid_all_mpas_b.csv"))
 
   ggplot(grid_final_area) +
     geom_histogram(aes(x = prop))
@@ -284,7 +284,9 @@ In the DBEM, MPA algorithm works as a multiplier of fishing effort so protected 
 grid_all_mpas <- read_csv("../Data/grid_all_mpas.csv")
 
 
-mpa_index <- grid_all_mpas %>% 
+
+mpa_index <-
+grid_all_mpas %>% 
   # fix numerical mismatch
   mutate(
     status = ifelse(is.na(status),"open",status),
@@ -294,6 +296,7 @@ mpa_index <- grid_all_mpas %>%
                   )
     )
   ) %>% 
+  # View()
   select(prop)
   
 name <- paste0(here("Data/mpa_index"),".txt")
