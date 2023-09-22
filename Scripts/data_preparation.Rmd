@@ -41,11 +41,8 @@ crs <- "+init=epsg:4326"
 
 rm(MPA1, MPA2, MPA3)
 
-MPA <- MPA %>% sample_frac(.02)
+# MPA <- MPA %>% sample_frac(.02) # use this for testing on smaller dataset 
 
-MPA1 <- read_sf("/Users/sarahroberts/Documents/mpa_ubc_project/Data/Coastal_Marine_in27.shp")
-#plot(MPA1)
-MPA1 <- MPA1 %>% dplyr::filter(MARINE == 2)
 ```
 
 #dissolve so that they are not overlapping 
@@ -92,6 +89,9 @@ grid_intersection <- st_intersection(grid, MPA_dissolve) %>%
 
 
 grid <- grid 
+grid$grid_area <- st_area(grid) #get the area of each grid cell (so we can calculate proportion of mpa)
+grid <- grid %>% drop_units()
+
 #rm(MPA_dissolve2)
 grid_intersection$status <- "protected" #lets us know that those grid cells have some level of MPA wiithin them 
 
@@ -107,9 +107,15 @@ grid_intersection_2 <- as.data.frame(grid_intersection)
 grid2 <- as.data.frame(grid)
 grid2 <- left_join(grid2, grid_intersection_2, by = "Seq")
 grid2$protected_area_m2  <- as.numeric(grid2$area)
+
+
 grid2 <- grid2 %>% dplyr::select(-geom)
+
+
 grid3 <- grid2
 grid2 <- st_as_sf(grid2)
+
+
 
 # ggplot() + geom_sf(subset(grid2, grid2$status == "protected"), mapping = aes(fill = protected_area_m2))+ geom_sf(grid_intersection, mapping = aes(colour = "red"))
 
@@ -123,7 +129,7 @@ gridpoints <- left_join(gridpoints, grid3, by = c("Seq","Lat","Lon"))
 # ggplot() +
 #   geom_point(data = subset(gridpoints, gridpoints$status == "protected"), aes(x = Lon, y = Lat), size = .2, colour = "red") 
 
-grid_sp <- st_as_sf(gridpoints, coords = c("long", "lat"), crs = st_crs(crs))
+grid_sp <- st_as_sf(gridpoints, coords = c("Lon", "Lat"), crs = st_crs(crs))
 
 ```
 
@@ -147,7 +153,7 @@ now we need to assign every contiguous MPA grid cell a unique group ID
 ```{r}
 
 
-grid_final_sp <- st_as_sf(gridpoints, coords = c("long", "lat"), crs = st_crs(crs))
+grid_final_sp <- st_as_sf(gridpoints, coords = c("Lon", "Lat"), crs = st_crs(crs))
 
 grid_sp_MPA_poly <- grid_final_sp %>% 
   st_make_grid(cellsize = .5) %>% 
@@ -181,15 +187,16 @@ ggplot() + geom_sf(buffer, mapping = aes(colour = "buffer")) + geom_sf(subset(gr
 
 
 #now do the proportion calculation
+#groups is the continuous MPA 
 
-grid_sp_MPA <- grid_sp_MPA %>% add_count(groups)
-grid_sp_MPA$mpa_n <- grid_sp_MPA$n
-grid_sp_MPA1 <- as.data.frame(grid_sp_MPA) %>% dplyr::select(groups, mpa_n) %>% ungroup() %>% distinct()
+#calculate prop for each MPA 
+prop_allocate <- grid_sp_MPA %>% st_drop_geometry()
 
-intr <- left_join(intr, grid_sp_MPA1, by = "groups")
+#protected proportion to reallocate (calculated as area of each mpa/area of grid cells containing mpa)
+prop_allocate <- prop_allocate %>% group_by(groups) %>% summarise(prop_allocate = sum(protected_area_m2)/sum(grid_area))
 
-intr <- intr %>% add_count(groups) %>% mutate("prop" = ((mpa_n/n)) + 1) #this is the total number of gridcells within one continuous MPA/total number of grid cells surrounding that MPA 
-
+intr <- left_join(intr, prop_allocate, by = "groups")
+intr <- intr %>% add_count(groups) %>% mutate("prop" = ((prop_allocate/n)) + 1) #this is the total area of one mpa/total area of grid cells overlapping that MPA/total number of grid cells surrounding that MPA (n) 
 
 ```
 
@@ -198,13 +205,12 @@ intr <- intr %>% add_count(groups) %>% mutate("prop" = ((mpa_n/n)) + 1) #this is
 #### Clean up the dataset 
 
 ```{r}
-grid_MPA$prop <- 0
-grid_MPA$status <- "protected"
+grid_MPA<-grid_MPA %>% st_drop_geometry() %>% mutate(prop = 1- (protected_area_m2/grid_area), status = "protected")
 
-names <- c("Seq", "Lat", "Lon", "area", "status", "prop", "protected_area_m2")
+names <- c("Seq", "grid_area", "status", "prop", "protected_area_m2")
 
 grid_MPA <- grid_MPA[colnames(grid_MPA) %in% names]
-intr <- as.data.frame(intr)
+intr <- intr %>% st_drop_geometry()
 # write_csv(intr,"intr.csv")
 
 intr <- intr[colnames(intr) %in% names]
@@ -217,7 +223,7 @@ pt <- pt %>% distinct()
 gridpoints <- gridpoints %>% 
   dplyr::select(Seq,Lon,Lat)
 
-grid_final <- left_join(gridpoints, pt, by = c("Seq","Lon", "Lat"))
+grid_final <- left_join(gridpoints, pt, by = c("Seq"))
 grid_final <- grid_final %>% distinct() #some of the 
 
 grid_final %>% dplyr::filter(status %in% c("protected","surrounding")) %>%
@@ -228,33 +234,10 @@ grid_final %>% dplyr::filter(status %in% c("protected","surrounding")) %>%
                 )
             )
 
-# write.csv(grid_final, here("./Data/grid_all_mpas.csv"))
-```
-
-
-### Estimate area
-
-
-```{r}
-
- # 1.2 Estimate gridcell area based on global variables (m^2)
-# Degree ressolution for area estimation
-# https://rdrr.io/github/stineb/rbeni/src/R/area.R
-# https://www.pmel.noaa.gov/maillists/tmap/ferret_users/fu_2004/msg00023.html
-# https://www.engr.scu.edu/~emaurer/tools/calc_cell_area_cgi.pl
-
-r_earth <- 6371000 # NASA's volumetric mean radious https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html
-res_lon <- 0.5 # lon degree resolution
-res_lat <- 0.5 # lat degree resolution
-
-grid_final_area <-
-  grid_mpas %>%
+grid_final <-
+  grid_final %>%
     janitor::clean_names() %>% 
-  mutate(
-    grid_area = (4 * r_earth^2 * 0.5 * res_lon * pi/180 * cos(abs(lat) * pi/180 ) * sin(0.5 * res_lat * pi/180)),
-    prop = ifelse(status == "protected", protected_area_m2/grid_area, prop),
-    prop = replace_na(prop,0)
-  )
+  mutate (prop = ifelse(status %in% "protected" | status %in% "surrounding", prop,1))
 
 
 write.csv(grid_final_area, here("./Data/grid_all_mpas_b.csv"))
@@ -272,8 +255,10 @@ grid_final_area %>%
     )
   )
 
-
+write.csv(grid_final, here("./Data/grid_all_mpas.csv"))
 ```
+
+
 
 ## Prepare grid data for DBEM
 
