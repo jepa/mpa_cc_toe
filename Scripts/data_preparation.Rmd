@@ -21,6 +21,7 @@ sf::sf_use_s2(use_s2 = FALSE)
 
 select <- dplyr::select
 
+
 ```
 
 # Identify grids that are MPAs or surrounding an MPA
@@ -74,7 +75,7 @@ end-beg
 (and what is the area of that gridcell that contains and MPA)
 
 ```{r}
-grid <- read_sf(here("./Data/spatial/worldsq_EA.shp"))
+grid <- read_sf(here("./data/spatial/worldsq_EA.shp"))
 
 #convert grid coordinate system to be same as lat long WGS_1984
 grid <- st_transform(grid, crs = st_crs(crs)) %>% 
@@ -122,7 +123,7 @@ grid2 <- st_as_sf(grid2)
 #that looks like it worked to me. 
 
 #we can join back to the gridPoints file for the next step 
-gridpoints <- read.csv(here("./Data/Lon_Lat_DBEM.txt"), header = FALSE)
+gridpoints <- read.csv(here("./data/spatial/lon_lat_dbem.txt"), header = FALSE)
 colnames(gridpoints) <- c("Seq", "Lon", "Lat")
 gridpoints <- left_join(gridpoints, grid3, by = c("Seq","Lat","Lon"))
 
@@ -240,7 +241,7 @@ grid_final <-
   mutate (prop = ifelse(status %in% "protected" | status %in% "surrounding", prop,1))
 
 
-write.csv(grid_final_area, here("./Data/grid_all_mpas_b.csv"))
+write.csv(grid_final_area, here("./data/mpa/grid_all_mpas_b.csv"))
 
   ggplot(grid_final_area) +
     geom_histogram(aes(x = prop))
@@ -255,7 +256,7 @@ grid_final_area %>%
     )
   )
 
-write.csv(grid_final, here("./Data/grid_all_mpas.csv"))
+write.csv(grid_final, here("./data/mpa/grid_all_mpas.csv"))
 ```
 
 
@@ -266,12 +267,11 @@ In the DBEM, MPA algorithm works as a multiplier of fishing effort so protected 
 
 ```{r}
 # Load all MPAs dataset
-grid_all_mpas <- read_csv("../Data/grid_all_mpas.csv")
+grid_all_mpas <- read_csv("../data/mpa/grid_all_mpas.csv")
 
 
 
-mpa_index <-
-grid_all_mpas %>% 
+mpa_index <- grid_all_mpas %>% 
   # fix numerical mismatch
   mutate(
     status = ifelse(is.na(status),"open",status),
@@ -284,11 +284,30 @@ grid_all_mpas %>%
   # View()
   select(prop)
   
-name <- paste0(here("Data/mpa_index"),".txt")
+grid_all_mpas %>%
+ggplot() +
+  geom_tile(
+    aes(
+      x = lon,
+      y = lat,
+      fill = prop
+    )
+  ) +
+  facet_wrap(~status) +
+  scale_fill_viridis_b()
+
+
+
+
+name <- paste0(here("data/mpa/mpa_index"),".txt")
 write.table(mpa_index, file=name, sep="\t", col.names = F, row.names = F)
 
 
 # mpa_index.txt Sent to Compute Canada on June 2023
+
+
+
+
 
 ```
 
