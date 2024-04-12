@@ -26,7 +26,7 @@ select <- dplyr::select
 if(Sys.info()[8] == "jepa88"){
   root_path <- "~/OneDrive - UBC/Data/mpa_cc_toe/"
 }else{
-  root_path <- "/Users/sarahroberts/Documents/ClimateOceanPlanning/R/mpa_cc_toe_old" # SARAH MAKE SURE THIS PATH MAKES SENSE
+  root_path <- "/Users/sarahroberts/Library/CloudStorage/GoogleDrive-srobs32@gmail.com/My Drive/Work/Projects/mpa_ubc_project/mpa_cc_toe_old" # SARAH MAKE SURE THIS PATH MAKES SENSE
 }
 
 
@@ -37,14 +37,16 @@ if(Sys.info()[8] == "jepa88"){
 ## load the data into R 
 
 ```{r}
-MPA1 <- read_sf(paste0(root_path,"/data/spatial/WDPA_WDOECM_Jul2022_Public_marine_shp/WDPA_WDOECM_Jul2022_Public_marine_shp_0/WDPA_WDOECM_Jul2022_Public_marine_shp-polygons.shp"))
+MPA1 <- read_sf(paste0(root_path,"/data/spatial/WDPA_Apr2024_Public_shp/WDPA_Apr2024_Public_shp_0/WDPA_Apr2024_Public_shp-polygons.shp"))
 #plot(MPA1)
 
-MPA2 <- read_sf(paste0(root_path,"/data/spatial/WDPA_WDOECM_Jul2022_Public_marine_shp/WDPA_WDOECM_Jul2022_Public_marine_shp_1/WDPA_WDOECM_Jul2022_Public_marine_shp-polygons.shp"))
+MPA2 <- read_sf(paste0(root_path,"/data/spatial/WDPA_Apr2024_Public_shp/WDPA_Apr2024_Public_shp_1/WDPA_Apr2024_Public_shp-polygons.shp"))
 
-MPA3 <- read_sf(paste0(root_path,"/data/spatial/WDPA_WDOECM_Jul2022_Public_marine_shp/WDPA_WDOECM_Jul2022_Public_marine_shp_2/WDPA_WDOECM_Jul2022_Public_marine_shp-polygons.shp"))
+MPA3 <- read_sf(paste0(root_path,"/data/spatial/WDPA_Apr2024_Public_shp/WDPA_Apr2024_Public_shp_2/WDPA_Apr2024_Public_shp-polygons.shp"))
 
 MPA <- dplyr::bind_rows(list(MPA1, MPA2, MPA3))
+#select only marine
+MPA <- MPA %>% filter(MARINE == 2)
 crs <- "+init=epsg:4326"
 
 
@@ -56,8 +58,9 @@ rm(MPA1, MPA2, MPA3)
 
 #dissolve so that they are not overlapping 
 This is necessary for the area calculation 
-Here is where you would select out just the Marine (2 or the marine and coastal, 2 and 1)
-You can also select out just the no take here. 
+Here is where you would select out just the no take
+MPA <- MPA %>% filter(NO_TAKE == ) "All", "Part", "None", "Not Reported", "Not Applicable"
+
 ```{r}
 beg<- Sys.time()
 MPA$to_dissolve <- "A"
@@ -80,14 +83,13 @@ end-beg
 ```
 
 ##which gridcells overlap with an MPA 
-(and what is the area of that gridcell that contains and MPA)
+(and what is the area of that gridcell that contains an MPA)
 
 ```{r}
-grid <- read_sf(paste0(root_path,"data/spatial/worldsq_ea/worldsq_EA.shp"))
+grid <- read_sf(paste0(root_path,"/data/spatial/worldsq_ea/worldsq_EA.shp"))
 
 #convert grid coordinate system to be same as lat long WGS_1984
-grid <- st_transform(grid, crs = st_crs(crs)) %>% 
-  filter(PWater > 0)
+grid <- st_transform(grid, crs = st_crs(crs)) 
 
 #this tells you which gridcells intersect with an MPA and what area of the gridcell is covered 
 grid_intersection <- st_intersection(grid, MPA_dissolve) %>%
@@ -126,7 +128,8 @@ grid2 <- st_as_sf(grid2)
 
 
 
-# ggplot() + geom_sf(subset(grid2, grid2$status == "protected"), mapping = aes(fill = protected_area_m2))+ geom_sf(grid_intersection, mapping = aes(colour = "red"))
+# ggplot() + geom_sf(subset(grid2, grid2$status == "protected"), mapping = aes(fill = protected_area_m2))+ geom_sf(grid_intersection, mapping = aes(colour = "red")) +
+#     coord_sf(xlim=c(0, 50), ylim=c(40,70), expand = TRUE)
 
 #that looks like it worked to me. 
 
@@ -179,7 +182,8 @@ c = components(g)
 grid_sp_MPA_poly$groups = c$membership
 
 cols = rainbow(314, s=.6, v=.9)[sample(1:314,314)] 
-ggplot() + geom_sf(grid_sp_MPA_poly, mapping = aes(colour = as.factor(groups)))+ scale_colour_manual(values=cols)+ theme(legend.position="none")
+ggplot() + geom_sf(grid_sp_MPA_poly, mapping = aes(colour = as.factor(groups)))+ scale_colour_manual(values=cols)+ theme(legend.position="none")+
+     coord_sf(xlim=c(0, 50), ylim=c(40,70), expand = TRUE)
 
 #join that back to the grid_sp_MPA
 grid_sp_MPA_poly <- as.data.frame(grid_sp_MPA_poly) %>% dplyr::select(Seq, groups)
@@ -192,7 +196,8 @@ intr <- st_intersection(grid_sp_no_MPA, buffer, sparse = F)
 intr <- intr[colnames(intr) %in% c(colnames(grid_sp_no_MPA), "groups")]
 intr$status <- "surrounding"
 
-ggplot() + geom_sf(buffer, mapping = aes(colour = "buffer")) + geom_sf(subset(grid2, grid2$status == "protected"), mapping = aes(fill = protected_area_m2))+ geom_sf(grid_intersection, mapping = aes(colour = "MPA")) + geom_sf(intr, mapping = aes(colour = as.factor(groups)))
+ggplot() + geom_sf(buffer, mapping = aes(colour = "buffer")) + geom_sf(subset(grid2, grid2$status == "protected"), mapping = aes(fill = protected_area_m2))+ geom_sf(grid_intersection, mapping = aes(colour = "MPA")) + geom_sf(intr, mapping = aes(colour = as.factor(groups)))+
+     coord_sf(xlim=c(0, 50), ylim=c(40,70), expand = TRUE)
 
 
 #now do the proportion calculation
@@ -239,35 +244,20 @@ grid_final %>% dplyr::filter(status %in% c("protected","surrounding")) %>%
   ggplot() + 
   geom_tile(aes(x = Lon,
                 y = Lat,
-                colour = prop
+                fill = prop
                 )
-            )
+            )+
+     coord_sf(xlim=c(0, 50), ylim=c(40,70), expand = TRUE)
 
 grid_final <-
   grid_final %>%
     janitor::clean_names() %>% 
   mutate (prop = ifelse(status %in% "protected" | status %in% "surrounding", prop,1))
 
-
-write.csv(grid_final_area, paste0(root_path,"/data/mpa/grid_all_mpas_b.csv"))
-
-  ggplot(grid_final_area) +
-    geom_histogram(aes(x = prop))
-    
-grid_final_area %>% 
-  ggplot() +
-  geom_tile(
-    aes(
-      x = lon,
-      y = lat,
-      fill = prop
-    )
-  )
-
 write.csv(grid_final, paste0(root_path,"/data/mpa/grid_all_mpas.csv"))
 ```
 
-
+Sarah stopped here 
 
 ## Prepare grid data for DBEM
 
