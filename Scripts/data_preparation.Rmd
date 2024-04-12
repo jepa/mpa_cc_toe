@@ -259,53 +259,11 @@ write.csv(grid_final, paste0(root_path,"/data/mpa/grid_all_mpas.csv"))
 
 Sarah stopped here 
 
+prop within an MPA is 1-protected area coverage (so if MPA covers 70% of the grid cell, then prop = 30%, or fishing allowed = 30%)
+prop surrounding is 1+ displaced area coverage from MPA (split across all surrounding grid cells)
+
 ## Prepare grid data for DBEM
 
 In the DBEM, MPA algorithm works as a multiplier of fishing effort so protected areas should = 0 fo fishing effort, regardless of what it is in that cell, is 0. 
 
-```{r}
-# Load all MPAs dataset
-grid_all_mpas <- read_csv(paste0(root_path,"/data/mpa/grid_all_mpas.csv"))
-
-
-
-mpa_index <- grid_all_mpas %>% 
-  # fix numerical mismatch
-  mutate(
-    status = ifelse(is.na(status),"open",status),
-    prop = ifelse(status == "open",1,
-                  ifelse(status == "protected" & prop >= 1,0,
-                         ifelse(status == "protected" & prop < 1,1-prop,prop)
-                  )
-    )
-  ) %>% 
-  # View()
-  select(prop)
-  
-grid_all_mpas %>%
-ggplot() +
-  geom_tile(
-    aes(
-      x = lon,
-      y = lat,
-      fill = prop
-    )
-  ) +
-  facet_wrap(~status) +
-  scale_fill_viridis_b()
-
-
-
-
-name <- paste0(root_path,"data/mpa/mpa_index",".txt")
-write.table(mpa_index, file=name, sep="\t", col.names = F, row.names = F)
-
-
-# mpa_index.txt Sent to Compute Canada on June 2023
-
-
-
-
-
-```
 
