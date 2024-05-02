@@ -266,4 +266,33 @@ prop surrounding is 1+ displaced area coverage from MPA (split across all surrou
 
 In the DBEM, MPA algorithm works as a multiplier of fishing effort so protected areas should = 0 fo fishing effort, regardless of what it is in that cell, is 0. 
 
+### Visualize grid
+
+```{r}
+
+#MPA metadata
+grid_meta <- read_csv(paste0(root_path,"/data/mpa/grid_all_mpas.csv"))
+
+# Get MPA prop grid
+grid_mpa <- read.csv(paste0(root_path,"/data/mpa/mpa_index.txt"), header = F) %>% 
+  select(fmort=V1)
+
+head(grid_mpa)
+
+bind_cols(grid_meta,grid_mpa) %>% 
+  # mutate()
+  ggplot() +
+  geom_tile(
+    aes(
+      x = lon,
+      y = lat,
+      fill = fmort,
+      col = fmort
+    )
+  ) +
+  scale_fill_viridis_b() +
+  scale_color_viridis_b() +
+  facet_wrap(~status)
+
+```
 
