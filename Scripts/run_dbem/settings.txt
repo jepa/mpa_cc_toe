@@ -1,8 +1,8 @@
- SppNo           27
- CCSc C6GFDL26                                 
- SSP SSP126                                  
- rsfile MisSppList          
- rpath c6fgdl26f1mpa1test
+ SppNo           40
+ CCSc C6GFDL85                                 
+ SSP SSP585                                  
+ rsfile RunSppList          
+ rpath c6fgdl85f1mpatest
  tpath TaxonDataC0                   
  ifile 10                  
  FHS    1.00
