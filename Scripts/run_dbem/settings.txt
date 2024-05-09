@@ -1,4 +1,4 @@
- SppNo           40
+ SppNo           4
  CCSc C6GFDL85                                 
  SSP SSP585                                  
  rsfile RunSppList          
@@ -8,3 +8,4 @@
  FHS    1.00
  FEEZ    1.00
  MPApath mpa_index                                  
+ setpath /home/jepa/projects/def-wailung/jepa/mpa_cc_toe/Scripts/run_dbem
