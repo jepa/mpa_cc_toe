@@ -1,9 +1,0 @@
-forrtl: severe (47): write to READONLY file, unit 1, file /project/6006523/jepa/mpa_cc_toe/Scripts/run_dbem/
-Image              PC                Routine            Line        Source             
-DBEM_v2_y          0000000000455AD3  Unknown               Unknown  Unknown
-DBEM_v2_y          0000000000420B3C  Unknown               Unknown  Unknown
-DBEM_v2_y          0000000000404442  Unknown               Unknown  Unknown
-DBEM_v2_y          000000000040434D  Unknown               Unknown  Unknown
-libc.so.6          00002B4A6B66594A  Unknown               Unknown  Unknown
-libc.so.6          00002B4A6B665A05  __libc_start_main     Unknown  Unknown
-DBEM_v2_y          0000000000404261  Unknown               Unknown  Unknown
