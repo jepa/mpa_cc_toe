@@ -3,13 +3,14 @@
 #SBATCH --account=def-wailung
 #SBATCH -N 1 	#Nodes
 #SBATCH -N 1	#CPU count
-#SBATCH --mem-per-cpu=100M
-#SBATCH -t 00-00:10:00
+#SBATCH --mem-per-cpu=700M
+#SBATCH -t 00-15:00:00
 #SBATCH --mail-user=j.palacios@oceans.ubc.ca
 #SBATCH --mail-type=ALL
 #SBATCH --array=10-11
-#SBATCH --output=Array-%A-%a.out
-#SBATCH --error=Array-%A-%a.err
+#SBATCH --output=./slurm_out/Array-%A-%a.out
+#SBATCH --error=./slurm_out/Array-%A-%a.err
+
 
 cd $SLURM_SUBMIT_DIR
 echo "Current working directory is `pwd`"

@@ -1,4 +1,4 @@
- SppNo            4
+ SppNo            40
  CCSc C6GFDL85                                
  SSP SSP585                                  
  rsfile RunSppList          
