@@ -27,7 +27,9 @@ if(Sys.info()[8] == "jepa88"){
   root_path <- "~/OneDrive - UBC/Data/mpa_cc_toe/"
 }else{
   root_path <- "/Users/sarahroberts/Library/CloudStorage/GoogleDrive-srobs32@gmail.com/My Drive/Work/Projects/mpa_ubc_project/mpa_cc_toe_old" # SARAH MAKE SURE THIS PATH MAKES SENSE
+root_path <- "C:/Users/jepa88/Downloads"
 }
+
 
 
 ```
@@ -46,7 +48,8 @@ MPA3 <- read_sf(paste0(root_path,"/data/spatial/WDPA_Apr2024_Public_shp/WDPA_Apr
 
 MPA <- dplyr::bind_rows(list(MPA1, MPA2, MPA3))
 #select only marine
-MPA <- MPA %>% filter(MARINE == 2)
+MPA <- MPA %>% filter(MARINE == 2,
+                      REP_M_AREA == REP_AREA)
 crs <- "+init=epsg:4326"
 
 
@@ -55,6 +58,29 @@ rm(MPA1, MPA2, MPA3)
 # MPA <- MPA %>% sample_frac(.02) # use this for testing on smaller dataset 
 
 ```
+
+```{r}
+
+grid_sf <- st_as_sf(gridpoints, coords = c("Lon","Lat"))%>% 
+  st_set_crs(4326)
+
+st_crs(grid_sf) <- "+init=epsg:4326"
+
+mpa_dbem <- st_join(grid_sf,
+                     MPA,
+                     join = st_intersects)
+
+
+mpa_dbem_df <- mpa_dbem%>% 
+  as.data.frame() %>% 
+  janitor::clean_names() %>% 
+  select(seq,wdpaid,iucn_cat,con_status = status,status_yr)
+
+
+
+write.csv(mpa_dbem_df, paste0(root_path,"/data/mpa/grid_all_mpas_metadata.csv"))
+```
+
 
 #dissolve so that they are not overlapping 
 This is necessary for the area calculation 
@@ -242,12 +268,12 @@ grid_final <- grid_final %>% distinct() #some of the
 
 grid_final %>% dplyr::filter(status %in% c("protected","surrounding")) %>%
   ggplot() + 
-  geom_tile(aes(x = Lon,
-                y = Lat,
+  geom_tile(aes(x = lon,
+                y = lat,
                 fill = prop
                 )
-            )+
-     coord_sf(xlim=c(0, 50), ylim=c(40,70), expand = TRUE)
+            )#+
+     #coord_sf(xlim=c(0, 50), ylim=c(40,70), expand = TRUE)
 
 grid_final <-
   grid_final %>%
@@ -281,21 +307,23 @@ grid_mpa <- read.csv(paste0(root_path,"/data/mpa/mpa_index.txt"), header = F) %>
 head(grid_mpa)
 
 
-bind_cols(grid_meta,grid_mpa) %>% 
-  filter(fmort < 1) %>%
+#bind_cols(grid_meta,grid_mpa) %>% 
+grid_final %>%  
+  left_join(mpa_dbem_df) %>% 
+ #filter(prop > 1) %>%
   ggplot() +
   geom_tile(
     aes(
       x = lon,
       y = lat,
-      fill = status,
-      col = status
+      fill = prop,
+      col = prop
     )
   ) +
   # scale_fill_gradient(low = "yellow", high = "red", na.value = NA) +
   # scale_color_gradient(low = "yellow", high = "red", na.value = NA)
-  scale_fill_viridis_d() +
-  scale_color_viridis_d() #+
-# facet_wrap(~status)
+ # scale_fill_viridis_d() +
+#  scale_color_viridis_d() #+
+ facet_wrap(~con_status)
 
 ```
