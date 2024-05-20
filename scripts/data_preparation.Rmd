@@ -24,10 +24,13 @@ select <- dplyr::select
 
 # File path for dealing with multiple computers accessing data folder
 if(Sys.info()[8] == "jepa88"){
-  root_path <- "~/OneDrive - UBC/Data/mpa_cc_toe/"
+  if(Sys.info()[1] == "Windows"){ # fix annoying windows path issue
+    root_path <- "C:/Users/jepa88/OneDrive - UBC/Data/mpa_cc_toe"
+  }else{
+    root_path <- "~/OneDrive - UBC/Data/mpa_cc_toe"
+  }
 }else{
   root_path <- "/Users/sarahroberts/Library/CloudStorage/GoogleDrive-srobs32@gmail.com/My Drive/Work/Projects/mpa_ubc_project/mpa_cc_toe_old" # SARAH MAKE SURE THIS PATH MAKES SENSE
-root_path <- "C:/Users/jepa88/Downloads"
 }
 
 
@@ -59,29 +62,6 @@ rm(MPA1, MPA2, MPA3)
 
 ```
 
-```{r}
-
-grid_sf <- st_as_sf(gridpoints, coords = c("Lon","Lat"))%>% 
-  st_set_crs(4326)
-
-st_crs(grid_sf) <- "+init=epsg:4326"
-
-mpa_dbem <- st_join(grid_sf,
-                     MPA,
-                     join = st_intersects)
-
-
-mpa_dbem_df <- mpa_dbem%>% 
-  as.data.frame() %>% 
-  janitor::clean_names() %>% 
-  select(seq,wdpaid,iucn_cat,con_status = status,status_yr)
-
-
-
-write.csv(mpa_dbem_df, paste0(root_path,"/data/mpa/grid_all_mpas_metadata.csv"))
-```
-
-
 #dissolve so that they are not overlapping 
 This is necessary for the area calculation 
 Here is where you would select out just the no take
@@ -111,7 +91,7 @@ end-beg
 ##which gridcells overlap with an MPA 
 (and what is the area of that gridcell that contains an MPA)
 
-```{r}
+```{r overlap, eval = T, message=F,error=F,echo=F}
 grid <- read_sf(paste0(root_path,"/data/spatial/worldsq_ea/worldsq_EA.shp"))
 
 #convert grid coordinate system to be same as lat long WGS_1984
@@ -171,6 +151,7 @@ grid_sp <- st_as_sf(gridpoints, coords = c("Lon", "Lat"), crs = st_crs(crs))
 
 ```
 
+
 #figure out surrounding grids 
 ```{r}
 
@@ -222,8 +203,8 @@ intr <- st_intersection(grid_sp_no_MPA, buffer, sparse = F)
 intr <- intr[colnames(intr) %in% c(colnames(grid_sp_no_MPA), "groups")]
 intr$status <- "surrounding"
 
-ggplot() + geom_sf(buffer, mapping = aes(colour = "buffer")) + geom_sf(subset(grid2, grid2$status == "protected"), mapping = aes(fill = protected_area_m2))+ geom_sf(grid_intersection, mapping = aes(colour = "MPA")) + geom_sf(intr, mapping = aes(colour = as.factor(groups)))+
-     coord_sf(xlim=c(0, 50), ylim=c(40,70), expand = TRUE)
+#ggplot() + geom_sf(buffer, mapping = aes(colour = "buffer")) + geom_sf(subset(grid2, grid2$status == "protected"), mapping = aes(fill = protected_area_m2))+ geom_sf(grid_intersection, mapping = aes(colour = "MPA")) + geom_sf(intr, mapping = aes(colour = as.factor(groups)))+
+ #    coord_sf(xlim=c(0, 50), ylim=c(40,70), expand = TRUE)
 
 
 #now do the proportion calculation
@@ -268,8 +249,8 @@ grid_final <- grid_final %>% distinct() #some of the
 
 grid_final %>% dplyr::filter(status %in% c("protected","surrounding")) %>%
   ggplot() + 
-  geom_tile(aes(x = lon,
-                y = lat,
+  geom_tile(aes(x = Lon,
+                y = Lat,
                 fill = prop
                 )
             )#+
@@ -283,7 +264,27 @@ grid_final <-
 write.csv(grid_final, paste0(root_path,"/data/mpa/grid_all_mpas.csv"))
 ```
 
-Sarah stopped here 
+```{r eval = F}
+
+grid_sf <- st_as_sf(gridpoints, coords = c("Lon","Lat"))%>% 
+  st_set_crs(4326)
+
+st_crs(grid_sf) <- "+init=epsg:4326"
+
+mpa_dbem <- st_join(grid_sf,
+                     MPA,
+                     join = st_intersects)
+
+
+mpa_dbem_df <- mpa_dbem%>% 
+  as.data.frame() %>% 
+  janitor::clean_names() %>% 
+  select(seq,wdpaid,iucn_cat,con_status = status,status_yr)
+
+
+
+write.csv(mpa_dbem_df, paste0(root_path,"/data/mpa/grid_all_mpas_metadata.csv"))
+```
 
 prop within an MPA is 1-protected area coverage (so if MPA covers 70% of the grid cell, then prop = 30%, or fishing allowed = 30%)
 prop surrounding is 1+ displaced area coverage from MPA (split across all surrounding grid cells)
