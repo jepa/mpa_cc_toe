@@ -33,7 +33,7 @@ if(Sys.info()[8] == "jepa88"){
   root_path <- "/Users/sarahroberts/Library/CloudStorage/GoogleDrive-srobs32@gmail.com/My Drive/Work/Projects/mpa_ubc_project/mpa_cc_toe_old" # SARAH MAKE SURE THIS PATH MAKES SENSE
 }
 
-
+print(root_path)
 
 ```
 
@@ -293,38 +293,148 @@ prop surrounding is 1+ displaced area coverage from MPA (split across all surrou
 
 In the DBEM, MPA algorithm works as a multiplier of fishing effort so protected areas should = 0 fo fishing effort, regardless of what it is in that cell, is 0. 
 
-### Visualize grid
 
-```{r}
+### Load data
 
+```{r grid_data, eval = T, echo = F}
 
 #MPA metadata
-grid_meta <- read_csv(paste0(root_path,"/data/mpa/grid_all_mpas.csv"))
+grid_meta <- read_csv(paste0(root_path,"/data/mpa/grid_all_mpas_metadata.csv")) %>% 
+  select(-1)
+head(grid_meta)
 
 # Get MPA prop grid
-grid_mpa <- read.csv(paste0(root_path,"/data/mpa/mpa_index.txt"), header = F) %>% 
-  select(fmort=V1)
-
+grid_mpa <- read.csv(paste0(root_path,"/data/mpa/grid_all_mpas.csv"), header = T) %>% 
+  select(-1)
 head(grid_mpa)
 
 
-#bind_cols(grid_meta,grid_mpa) %>% 
-grid_final %>%  
-  left_join(mpa_dbem_df) %>% 
- #filter(prop > 1) %>%
+
+```
+
+### Visualize grid
+
+```{r grid_viz, eval = T, echo = F}
+
+
+grid_mpa %>%  
+  left_join(grid_meta) %>%
+ filter(con_status != "Proposed"#, no need to remove surroundings as there are any
+        # prop > 1
+        ) %>%
   ggplot() +
   geom_tile(
     aes(
       x = lon,
       y = lat,
       fill = prop,
-      col = prop
+      color = prop
     )
   ) +
-  # scale_fill_gradient(low = "yellow", high = "red", na.value = NA) +
-  # scale_color_gradient(low = "yellow", high = "red", na.value = NA)
+  scale_fill_gradient(low = "yellow", high = "red", na.value = NA) +
+  scale_color_gradient(low = "yellow", high = "red", na.value = NA)
  # scale_fill_viridis_d() +
-#  scale_color_viridis_d() #+
- facet_wrap(~con_status)
+ # scale_color_viridis_d() #+
+ # facet_wrap(~iucn_cat)
+
+```
+
+### Fix duplicated grids
+
+There are ~2k grid cells repeated as there is overlapping polygons
+
+```{r}
+
+duplicated_grid <- grid_mpa %>%  
+  left_join(grid_meta) %>% 
+  filter(duplicated(seq))
+
+  # Explore why they are duplicated  
+grid_mpa %>%  
+  left_join(grid_meta) %>% 
+    filter(seq %in% duplicated_grid$seq,
+           seq== 19130 # 47183
+           ) %>% 
+  group_by(seq,iucn_cat) %>% 
+  tally() %>% 
+  arrange(desc(n))
+
+# Look like some of them are part of two polygons (e.g., seq == 19130 iucn_cat %in% c(lb,not reported))
+
+# We can just averaged them as they are all the same
+duplicated_grids_fix <- grid_mpa %>%  
+  left_join(grid_meta) %>% 
+  filter(seq %in% duplicated_grid$seq) %>% 
+  group_by(seq,lon,lat,grid_area,status,protected_area_m2) %>% 
+  summarise_if(is.numeric,mean,na.rm = T) %>% 
+  mutate(iucn_cat = "merged",
+         con_status = "merged") #%>% 
+  # double check 
+  # filter(duplicated(seq))
+  # filter(seq == 23240)
+
+# no NAs
+duplicated_grids_fix %>% 
+  filter(is.na(prop))
+  
+# Re-built grid
+non_duplicated_grid <- grid_mpa %>%  
+  left_join(grid_meta) %>% 
+  filter(!seq %in% duplicated_grid$seq) %>%  # Remove duplicates
+  bind_rows(duplicated_grids_fix) %>% 
+  arrange(seq)
+
+# no NAs
+non_duplicated_grid %>% 
+  filter(is.na(prop))
+
+
+```
+
+
+### Create index
+
+Needs previous chunk that cleans duplicated grids
+
+```{r}
+
+# fix grid 
+dbem_mpa_index <- non_duplicated_grid %>% 
+  # filter(con_status=="Proposed")
+  # Filter out those only "proposed"
+  mutate(propb = ifelse(con_status == "Proposed",1,paste(prop))) %>% 
+  mutate(prop_final = ifelse(is.na(prop),propb,prop)) # annoying NAs
+
+# Check for NAs
+# dbem_mpa_index %>% 
+  # filter(is.na(prop_final))
+
+
+# Make sure it does what we inted
+dbem_mpa_index %>% 
+  filter(prop_final > 1) %>% 
+  ggplot() +
+  geom_tile(
+    aes(
+      x = lon,
+      y = lat,
+      fill = prop_final,
+      color = prop_final
+    )
+  ) +
+  scale_fill_gradient(low = "yellow", high = "red", na.value = NA) +
+  scale_color_gradient(low = "yellow", high = "red", na.value = NA)
+ # scale_fill_viridis_d() +
+ # scale_color_viridis_d() #+
+ # facet_wrap(~iucn_cat)
+  
+  
+dbem_mpa_index <- dbem_mpa_index %>% 
+  arrange(seq) %>% 
+  select(prop)
+  
+# Create index
+name <- paste0(root_path,"/data/mpa_cc_toe/mpa_index.csv")
+write.table(dbem_mpa_index, file=name, sep="\t", col.names = F, row.names = F)
 
 ```
