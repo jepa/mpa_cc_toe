@@ -69,4 +69,4 @@ getDoParWorkers()# you can compare with the number of actual workers
 #        scen = scen)
 
 # Run in parallel
-foreach(y=1:length(yrs)) %dopar% {aggr_data(yrs[y],spplist,var = varaibles, scen = scen)}
+foreach(y=1:length(yrs)) %dopar% {aggr_data(yrs[y],spplist,var = variables, scen = scen)}
