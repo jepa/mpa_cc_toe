@@ -1,0 +1,646 @@
+Current working directory: /home/jepa/projects/def-wailung/jepa/mpa_cc_toe/scripts/run_dbem
+Starting run at: Wed 22 May 2024 10:16:06 AM PDT
+here() starts at /project/6006523/jepa/mpa_cc_toe
+Loading required package: tidyverse
+── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+Loading required package: data.table
+
+Attaching package: ‘data.table’
+
+The following objects are masked from ‘package:lubridate’:
+
+    hour, isoweek, mday, minute, month, quarter, second, wday, week,
+    yday, year
+
+The following objects are masked from ‘package:dplyr’:
+
+    between, first, last
+
+The following object is masked from ‘package:purrr’:
+
+    transpose
+
+Loading required package: foreach
+
+Attaching package: ‘foreach’
+
+The following objects are masked from ‘package:purrr’:
+
+    accumulate, when
+
+Loading required package: doParallel
+Loading required package: iterators
+Loading required package: parallel
+ tidyverse data.table    foreach doParallel 
+      TRUE       TRUE       TRUE       TRUE 
+[1] "4"
+[1] "4"
+[1] "Completed year 1953 with 259200 rows"
+[1] "Completed year 1951 with 259200 rows"
+[1] "Completed year 1952 with 259200 rows"
+[1] "Completed year 1954 with 259200 rows"
+[1] "Completed year 1955 with 259200 rows"
+[1] "Completed year 1957 with 259200 rows"
+[1] "Completed year 1956 with 259200 rows"
+[1] "Completed year 1958 with 259200 rows"
+[1] "Completed year 1959 with 259200 rows"
+[1] "Completed year 1961 with 259200 rows"
+[1] "Completed year 1960 with 259200 rows"
+[1] "Completed year 1962 with 259200 rows"
+[1] "Completed year 1963 with 259200 rows"
+[1] "Completed year 1964 with 259200 rows"
+[1] "Completed year 1965 with 259200 rows"
+[1] "Completed year 1966 with 259200 rows"
+[1] "Completed year 1967 with 259200 rows"
+[1] "Completed year 1969 with 259200 rows"
+[1] "Completed year 1968 with 259200 rows"
+[1] "Completed year 1970 with 259200 rows"
+[1] "Completed year 1971 with 259200 rows"
+[1] "Completed year 1972 with 259200 rows"
+[1] "Completed year 1973 with 259200 rows"
+[1] "Completed year 1974 with 259200 rows"
+[1] "Completed year 1975 with 259200 rows"
+[1] "Completed year 1977 with 259200 rows"
+[1] "Completed year 1976 with 259200 rows"
+[1] "Completed year 1978 with 259200 rows"
+[1] "Completed year 1979 with 259200 rows"
+[1] "Completed year 1982 with 259200 rows"
+[1] "Completed year 1980 with 259200 rows"
+[1] "Completed year 1981 with 259200 rows"
+[1] "Completed year 1983 with 259200 rows"
+[1] "Completed year 1986 with 259200 rows"
+[1] "Completed year 1984 with 259200 rows"
+[1] "Completed year 1985 with 259200 rows"
+[1] "Completed year 1987 with 259200 rows"
+[1] "Completed year 1990 with 259200 rows"
+[1] "Completed year 1988 with 259200 rows"
+[1] "Completed year 1989 with 259200 rows"
+[1] "Completed year 1991 with 259200 rows"
+[1] "Completed year 1994 with 259200 rows"
+[1] "Completed year 1992 with 259200 rows"
+[1] "Completed year 1993 with 259200 rows"
+[1] "Completed year 1998 with 259200 rows"
+[1] "Completed year 1995 with 259200 rows"
+[1] "Completed year 1996 with 259200 rows"
+[1] "Completed year 1997 with 259200 rows"
+[1] "Completed year 2002 with 259200 rows"
+[1] "Completed year 1999 with 259200 rows"
+[1] "Completed year 2000 with 259200 rows"
+[1] "Completed year 2001 with 259200 rows"
+[1] "Completed year 2006 with 259200 rows"
+[1] "Completed year 2003 with 259200 rows"
+[1] "Completed year 2004 with 259200 rows"
+[1] "Completed year 2005 with 259200 rows"
+[1] "Completed year 2010 with 259200 rows"
+[1] "Completed year 2007 with 259200 rows"
+[1] "Completed year 2008 with 259200 rows"
+[1] "Completed year 2009 with 259200 rows"
+[1] "Completed year 2014 with 259200 rows"
+[1] "Completed year 2011 with 259200 rows"
+[1] "Completed year 2012 with 259200 rows"
+[1] "Completed year 2018 with 259200 rows"
+[1] "Completed year 2013 with 259200 rows"
+[1] "Completed year 2015 with 259200 rows"
+[1] "Completed year 2016 with 259200 rows"
+[1] "Completed year 2022 with 259200 rows"
+[1] "Completed year 2017 with 259200 rows"
+[1] "Completed year 2020 with 259200 rows"
+[1] "Completed year 2019 with 259200 rows"
+[1] "Completed year 2026 with 259200 rows"
+[1] "Completed year 2021 with 259200 rows"
+[1] "Completed year 2024 with 259200 rows"
+[1] "Completed year 2023 with 259200 rows"
+[1] "Completed year 2030 with 259200 rows"
+[1] "Completed year 2025 with 259200 rows"
+[1] "Completed year 2028 with 259200 rows"
+[1] "Completed year 2027 with 259200 rows"
+[1] "Completed year 2034 with 259200 rows"
+[1] "Completed year 2029 with 259200 rows"
+[1] "Completed year 2032 with 259200 rows"
+[1] "Completed year 2038 with 259200 rows"
+[1] "Completed year 2031 with 259200 rows"
+[1] "Completed year 2033 with 259200 rows"
+[1] "Completed year 2036 with 259200 rows"
+[1] "Completed year 2042 with 259200 rows"
+[1] "Completed year 2035 with 259200 rows"
+[1] "Completed year 2040 with 259200 rows"
+[1] "Completed year 2037 with 259200 rows"
+[1] "Completed year 2039 with 259200 rows"
+[1] "Completed year 2046 with 259200 rows"
+[1] "Completed year 2041 with 259200 rows"
+[1] "Completed year 2044 with 259200 rows"
+[1] "Completed year 2043 with 259200 rows"
+[1] "Completed year 2050 with 259200 rows"
+[1] "Completed year 2045 with 259200 rows"
+[1] "Completed year 2048 with 259200 rows"
+[1] "Completed year 2054 with 259200 rows"
+[1] "Completed year 2047 with 259200 rows"
+[1] "Completed year 2049 with 259200 rows"
+[1] "Completed year 2052 with 259200 rows"
+[1] "Completed year 2058 with 259200 rows"
+[1] "Completed year 2051 with 259200 rows"
+[1] "Completed year 2053 with 259200 rows"
+[1] "Completed year 2056 with 259200 rows"
+[1] "Completed year 2062 with 259200 rows"
+[1] "Completed year 2055 with 259200 rows"
+[1] "Completed year 2057 with 259200 rows"
+[1] "Completed year 2060 with 259200 rows"
+[1] "Completed year 2066 with 259200 rows"
+[1] "Completed year 2059 with 259200 rows"
+[1] "Completed year 2061 with 259200 rows"
+[1] "Completed year 2064 with 259200 rows"
+[1] "Completed year 2070 with 259200 rows"
+[1] "Completed year 2063 with 259200 rows"
+[1] "Completed year 2065 with 259200 rows"
+[1] "Completed year 2074 with 259200 rows"
+[1] "Completed year 2068 with 259200 rows"
+[1] "Completed year 2067 with 259200 rows"
+[1] "Completed year 2069 with 259200 rows"
+[1] "Completed year 2072 with 259200 rows"
+[1] "Completed year 2078 with 259200 rows"
+[1] "Completed year 2071 with 259200 rows"
+[1] "Completed year 2073 with 259200 rows"
+[1] "Completed year 2082 with 259200 rows"
+[1] "Completed year 2076 with 259200 rows"
+[1] "Completed year 2075 with 259200 rows"
+[1] "Completed year 2077 with 259200 rows"
+[1] "Completed year 2086 with 259200 rows"
+[1] "Completed year 2080 with 259200 rows"
+[1] "Completed year 2079 with 259200 rows"
+[1] "Completed year 2090 with 259200 rows"
+[1] "Completed year 2081 with 259200 rows"
+[1] "Completed year 2084 with 259200 rows"
+[1] "Completed year 2083 with 259200 rows"
+[1] "Completed year 2094 with 259200 rows"
+[1] "Completed year 2085 with 259200 rows"
+[1] "Completed year 2088 with 259200 rows"
+[1] "Completed year 2098 with 259200 rows"
+[1] "Completed year 2087 with 259200 rows"
+[1] "Completed year 2089 with 259200 rows"
+[1] "Completed year 2092 with 259200 rows"
+[1] "Completed year 2091 with 259200 rows"
+[1] "Completed year 2096 with 259200 rows"
+[1] "Completed year 2093 with 259200 rows"
+[1] "Completed year 2095 with 259200 rows"
+[1] "Completed year 2100 with 259200 rows"
+[1] "Completed year 2097 with 259200 rows"
+[1] "Completed year 2099 with 259200 rows"
+[[1]]
+[1] "Completed year 1951 with 259200 rows"
+
+[[2]]
+[1] "Completed year 1952 with 259200 rows"
+
+[[3]]
+[1] "Completed year 1953 with 259200 rows"
+
+[[4]]
+[1] "Completed year 1954 with 259200 rows"
+
+[[5]]
+[1] "Completed year 1955 with 259200 rows"
+
+[[6]]
+[1] "Completed year 1956 with 259200 rows"
+
+[[7]]
+[1] "Completed year 1957 with 259200 rows"
+
+[[8]]
+[1] "Completed year 1958 with 259200 rows"
+
+[[9]]
+[1] "Completed year 1959 with 259200 rows"
+
+[[10]]
+[1] "Completed year 1960 with 259200 rows"
+
+[[11]]
+[1] "Completed year 1961 with 259200 rows"
+
+[[12]]
+[1] "Completed year 1962 with 259200 rows"
+
+[[13]]
+[1] "Completed year 1963 with 259200 rows"
+
+[[14]]
+[1] "Completed year 1964 with 259200 rows"
+
+[[15]]
+[1] "Completed year 1965 with 259200 rows"
+
+[[16]]
+[1] "Completed year 1966 with 259200 rows"
+
+[[17]]
+[1] "Completed year 1967 with 259200 rows"
+
+[[18]]
+[1] "Completed year 1968 with 259200 rows"
+
+[[19]]
+[1] "Completed year 1969 with 259200 rows"
+
+[[20]]
+[1] "Completed year 1970 with 259200 rows"
+
+[[21]]
+[1] "Completed year 1971 with 259200 rows"
+
+[[22]]
+[1] "Completed year 1972 with 259200 rows"
+
+[[23]]
+[1] "Completed year 1973 with 259200 rows"
+
+[[24]]
+[1] "Completed year 1974 with 259200 rows"
+
+[[25]]
+[1] "Completed year 1975 with 259200 rows"
+
+[[26]]
+[1] "Completed year 1976 with 259200 rows"
+
+[[27]]
+[1] "Completed year 1977 with 259200 rows"
+
+[[28]]
+[1] "Completed year 1978 with 259200 rows"
+
+[[29]]
+[1] "Completed year 1979 with 259200 rows"
+
+[[30]]
+[1] "Completed year 1980 with 259200 rows"
+
+[[31]]
+[1] "Completed year 1981 with 259200 rows"
+
+[[32]]
+[1] "Completed year 1982 with 259200 rows"
+
+[[33]]
+[1] "Completed year 1983 with 259200 rows"
+
+[[34]]
+[1] "Completed year 1984 with 259200 rows"
+
+[[35]]
+[1] "Completed year 1985 with 259200 rows"
+
+[[36]]
+[1] "Completed year 1986 with 259200 rows"
+
+[[37]]
+[1] "Completed year 1987 with 259200 rows"
+
+[[38]]
+[1] "Completed year 1988 with 259200 rows"
+
+[[39]]
+[1] "Completed year 1989 with 259200 rows"
+
+[[40]]
+[1] "Completed year 1990 with 259200 rows"
+
+[[41]]
+[1] "Completed year 1991 with 259200 rows"
+
+[[42]]
+[1] "Completed year 1992 with 259200 rows"
+
+[[43]]
+[1] "Completed year 1993 with 259200 rows"
+
+[[44]]
+[1] "Completed year 1994 with 259200 rows"
+
+[[45]]
+[1] "Completed year 1995 with 259200 rows"
+
+[[46]]
+[1] "Completed year 1996 with 259200 rows"
+
+[[47]]
+[1] "Completed year 1997 with 259200 rows"
+
+[[48]]
+[1] "Completed year 1998 with 259200 rows"
+
+[[49]]
+[1] "Completed year 1999 with 259200 rows"
+
+[[50]]
+[1] "Completed year 2000 with 259200 rows"
+
+[[51]]
+[1] "Completed year 2001 with 259200 rows"
+
+[[52]]
+[1] "Completed year 2002 with 259200 rows"
+
+[[53]]
+[1] "Completed year 2003 with 259200 rows"
+
+[[54]]
+[1] "Completed year 2004 with 259200 rows"
+
+[[55]]
+[1] "Completed year 2005 with 259200 rows"
+
+[[56]]
+[1] "Completed year 2006 with 259200 rows"
+
+[[57]]
+[1] "Completed year 2007 with 259200 rows"
+
+[[58]]
+[1] "Completed year 2008 with 259200 rows"
+
+[[59]]
+[1] "Completed year 2009 with 259200 rows"
+
+[[60]]
+[1] "Completed year 2010 with 259200 rows"
+
+[[61]]
+[1] "Completed year 2011 with 259200 rows"
+
+[[62]]
+[1] "Completed year 2012 with 259200 rows"
+
+[[63]]
+[1] "Completed year 2013 with 259200 rows"
+
+[[64]]
+[1] "Completed year 2014 with 259200 rows"
+
+[[65]]
+[1] "Completed year 2015 with 259200 rows"
+
+[[66]]
+[1] "Completed year 2016 with 259200 rows"
+
+[[67]]
+[1] "Completed year 2017 with 259200 rows"
+
+[[68]]
+[1] "Completed year 2018 with 259200 rows"
+
+[[69]]
+[1] "Completed year 2019 with 259200 rows"
+
+[[70]]
+[1] "Completed year 2020 with 259200 rows"
+
+[[71]]
+[1] "Completed year 2021 with 259200 rows"
+
+[[72]]
+[1] "Completed year 2022 with 259200 rows"
+
+[[73]]
+[1] "Completed year 2023 with 259200 rows"
+
+[[74]]
+[1] "Completed year 2024 with 259200 rows"
+
+[[75]]
+[1] "Completed year 2025 with 259200 rows"
+
+[[76]]
+[1] "Completed year 2026 with 259200 rows"
+
+[[77]]
+[1] "Completed year 2027 with 259200 rows"
+
+[[78]]
+[1] "Completed year 2028 with 259200 rows"
+
+[[79]]
+[1] "Completed year 2029 with 259200 rows"
+
+[[80]]
+[1] "Completed year 2030 with 259200 rows"
+
+[[81]]
+[1] "Completed year 2031 with 259200 rows"
+
+[[82]]
+[1] "Completed year 2032 with 259200 rows"
+
+[[83]]
+[1] "Completed year 2033 with 259200 rows"
+
+[[84]]
+[1] "Completed year 2034 with 259200 rows"
+
+[[85]]
+[1] "Completed year 2035 with 259200 rows"
+
+[[86]]
+[1] "Completed year 2036 with 259200 rows"
+
+[[87]]
+[1] "Completed year 2037 with 259200 rows"
+
+[[88]]
+[1] "Completed year 2038 with 259200 rows"
+
+[[89]]
+[1] "Completed year 2039 with 259200 rows"
+
+[[90]]
+[1] "Completed year 2040 with 259200 rows"
+
+[[91]]
+[1] "Completed year 2041 with 259200 rows"
+
+[[92]]
+[1] "Completed year 2042 with 259200 rows"
+
+[[93]]
+[1] "Completed year 2043 with 259200 rows"
+
+[[94]]
+[1] "Completed year 2044 with 259200 rows"
+
+[[95]]
+[1] "Completed year 2045 with 259200 rows"
+
+[[96]]
+[1] "Completed year 2046 with 259200 rows"
+
+[[97]]
+[1] "Completed year 2047 with 259200 rows"
+
+[[98]]
+[1] "Completed year 2048 with 259200 rows"
+
+[[99]]
+[1] "Completed year 2049 with 259200 rows"
+
+[[100]]
+[1] "Completed year 2050 with 259200 rows"
+
+[[101]]
+[1] "Completed year 2051 with 259200 rows"
+
+[[102]]
+[1] "Completed year 2052 with 259200 rows"
+
+[[103]]
+[1] "Completed year 2053 with 259200 rows"
+
+[[104]]
+[1] "Completed year 2054 with 259200 rows"
+
+[[105]]
+[1] "Completed year 2055 with 259200 rows"
+
+[[106]]
+[1] "Completed year 2056 with 259200 rows"
+
+[[107]]
+[1] "Completed year 2057 with 259200 rows"
+
+[[108]]
+[1] "Completed year 2058 with 259200 rows"
+
+[[109]]
+[1] "Completed year 2059 with 259200 rows"
+
+[[110]]
+[1] "Completed year 2060 with 259200 rows"
+
+[[111]]
+[1] "Completed year 2061 with 259200 rows"
+
+[[112]]
+[1] "Completed year 2062 with 259200 rows"
+
+[[113]]
+[1] "Completed year 2063 with 259200 rows"
+
+[[114]]
+[1] "Completed year 2064 with 259200 rows"
+
+[[115]]
+[1] "Completed year 2065 with 259200 rows"
+
+[[116]]
+[1] "Completed year 2066 with 259200 rows"
+
+[[117]]
+[1] "Completed year 2067 with 259200 rows"
+
+[[118]]
+[1] "Completed year 2068 with 259200 rows"
+
+[[119]]
+[1] "Completed year 2069 with 259200 rows"
+
+[[120]]
+[1] "Completed year 2070 with 259200 rows"
+
+[[121]]
+[1] "Completed year 2071 with 259200 rows"
+
+[[122]]
+[1] "Completed year 2072 with 259200 rows"
+
+[[123]]
+[1] "Completed year 2073 with 259200 rows"
+
+[[124]]
+[1] "Completed year 2074 with 259200 rows"
+
+[[125]]
+[1] "Completed year 2075 with 259200 rows"
+
+[[126]]
+[1] "Completed year 2076 with 259200 rows"
+
+[[127]]
+[1] "Completed year 2077 with 259200 rows"
+
+[[128]]
+[1] "Completed year 2078 with 259200 rows"
+
+[[129]]
+[1] "Completed year 2079 with 259200 rows"
+
+[[130]]
+[1] "Completed year 2080 with 259200 rows"
+
+[[131]]
+[1] "Completed year 2081 with 259200 rows"
+
+[[132]]
+[1] "Completed year 2082 with 259200 rows"
+
+[[133]]
+[1] "Completed year 2083 with 259200 rows"
+
+[[134]]
+[1] "Completed year 2084 with 259200 rows"
+
+[[135]]
+[1] "Completed year 2085 with 259200 rows"
+
+[[136]]
+[1] "Completed year 2086 with 259200 rows"
+
+[[137]]
+[1] "Completed year 2087 with 259200 rows"
+
+[[138]]
+[1] "Completed year 2088 with 259200 rows"
+
+[[139]]
+[1] "Completed year 2089 with 259200 rows"
+
+[[140]]
+[1] "Completed year 2090 with 259200 rows"
+
+[[141]]
+[1] "Completed year 2091 with 259200 rows"
+
+[[142]]
+[1] "Completed year 2092 with 259200 rows"
+
+[[143]]
+[1] "Completed year 2093 with 259200 rows"
+
+[[144]]
+[1] "Completed year 2094 with 259200 rows"
+
+[[145]]
+[1] "Completed year 2095 with 259200 rows"
+
+[[146]]
+[1] "Completed year 2096 with 259200 rows"
+
+[[147]]
+[1] "Completed year 2097 with 259200 rows"
+
+[[148]]
+[1] "Completed year 2098 with 259200 rows"
+
+[[149]]
+[1] "Completed year 2099 with 259200 rows"
+
+[[150]]
+[1] "Completed year 2100 with 259200 rows"
+
