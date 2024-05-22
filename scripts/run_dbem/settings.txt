@@ -1,10 +1,10 @@
- SppNo            40
+ SppNo           40
  CCSc C6GFDL85                                
  SSP SSP585                                  
  rsfile RunSppList          
  rpath c6fgdl85f1mpatest             
  tpath TaxonDataC0                   
- ifile 12                  
+ ifile 17                  
  FHS    1.00
  FEEZ    1.00
  MPApath mpa_index                               
