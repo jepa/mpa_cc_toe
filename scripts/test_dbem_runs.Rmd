@@ -14,6 +14,7 @@ load_pkg(c(
   # For data wrangling
   "tidyverse",
   "janitor",
+  "data.table",
   # For collaborative ease
   "here",
   # for spatial analysis
@@ -41,42 +42,102 @@ We ran 40 species using the GFDL26 Pre Industrial with F1 and the MPA grid (RC6G
 # Read runs
 # runs <- list.files("/Volumes/Enterprise/Data/toe_mpa/dbem_runs/RC6GFDLPIF1MPA",full.names = T)
 
-# MPA grid
-grid_mpa <- read_csv("../Data/grid_all_mpas.csv") %>% 
-  select(index = seq,
-         status,
-         prop) %>% 
-  mutate(status = ifelse(is.na(status),"open",status))
+
+#MPA metadata
+grid_meta <- read_csv(paste0(root_path,"/data/mpa/grid_all_mpas_metadata.csv")) %>% 
+  select(-1)%>% 
+  rename(index = seq)
+head(grid_meta)
+
+# Get MPA prop grid
+grid_mpa <- read.csv(paste0(root_path,"/data/mpa/grid_all_mpas.csv"), header = T) %>% 
+  select(-1) %>% 
+  rename(index = seq)
+head(grid_mpa)
 
 # DBEM coordinates
-
 coods_dbem <- MyFunctions::my_data("dbem_coords")
 
 # Load DBEM
-dbem_df <- load_dbem("C6GFDL85F1MPAT3", cat = "Catch")
+dbem_df <- load_dbem("c6fgdl85f1mpatest", cat = "Catch")
 
-# sau_sf <- my_sf("SAU",simple = 100)
+# Load catch data
+catch_files <- list.files(MyFunctions::my_path("R","raw/",scenario), pattern = "Catch",full.names = T)
+
+catch_data <- bind_cols(
+  lapply(catch_files, fread)
+)
+
+colnames(catch_data) <- as.character(seq(1951,2100,1))
+
+catch_df <- catch_data %>% 
+  rowid_to_column("index") %>% 
+  gather("year","value",`1951`:`2100`) %>% 
+  mutate(year = as.numeric(year))
+
+
+# Load Abundance data
+abd_files <- list.files(MyFunctions::my_path("R","raw/",scenario), pattern = "Abd",full.names = T)
+
+abd_data <- bind_cols(
+  lapply(abd_files, fread)
+)
+
+colnames(abd_data) <- as.character(seq(1951,2100,1))
+
+abd_df <- abd_data %>% 
+  rowid_to_column("index") %>% 
+  gather("year","value",`1951`:`2100`) %>% 
+  mutate(year = as.numeric(year))
+
 
 ```
 
-
+## Linear examples
 
 ```{r}
 
-dbem_df %>% 
-  group_by(year) %>% 
-  filter(year >1852) %>% 
-  summarise(value = sum(value,na.rm = T)) %>% 
+abd_df %>% 
+  filter(year > 2000) %>% 
+  left_join(grid_mpa) %>% 
+  group_by(year,status) %>% 
+  summarise(t_value = sum(value,na.rm = T),
+            m_value = mean(value, na.rm =T)
+            ) %>% 
   ggplot() +
   geom_line(
     aes(
-      x = as.numeric(year),
-      y = value
+      x = year,
+      # y = log10(m_value),
+      y = m_value,
+      color = status
     )
   )
 
 ```
+## Map examples
 
+```{r}
+
+abd_df %>% 
+  left_join(grid_mpa) %>% 
+  filter(year %in% c(2000,2050),
+         value > 0 ) %>% 
+  ggplot() +
+  geom_tile(
+    aes(
+      x = lon,
+      y = lat,
+      # fill = value,
+      # color = value
+      fill = log10(value),
+      color = log10(value)
+    )
+  ) + facet_grid(status~year) +
+  scale_fill_gradient(low = "yellow", high = "red", na.value = NA) +
+  scale_color_gradient(low = "yellow", high = "red", na.value = NA)
+
+```
 
 
 ```{r}
@@ -107,3 +168,40 @@ dbem_df %>%
 
 ```
 
+## Per mpa exploration
+
+```{r}
+
+mpa_sf <- MPA %>% 
+  st_simplify(preserveTopology = T,dTolerance = 0.1) %>% 
+  clean_names()
+
+
+wdpaid_df <- abd_df %>% 
+  left_join(grid_meta) %>% 
+  group_by(year,wdpaid) %>% 
+  summarise(t_value = sum(value,na.rm = T),
+            m_value = mean(value, na.rm =T)
+            ) %>% 
+  filter(year %in% c(2000,2080))
+  
+
+mpa_map <- mpa_sf %>% 
+  select(wdpaid,name) %>% 
+  left_join(wdpaid_df, by = "wdpaid") %>% 
+  filter(!is.na(year)) %>% 
+  ggplot() +
+  my_land_map() +
+  geom_sf(
+    aes(
+      fill = log10(t_value)
+    )
+  ) +
+  facet_wrap(~year,ncol = 1) +
+  scale_fill_viridis_b()
+
+ggsave(plot = mpa_map,
+       filename =  "mpa_map.png", 
+       width = 10,height = 8)
+
+```
