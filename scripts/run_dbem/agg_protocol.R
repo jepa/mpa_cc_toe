@@ -7,7 +7,7 @@ source(here("Functions/agg_fx.R")) # Aggregstes data for FishMip
 
 # Load packages
 pckgs <- c("tidyverse","data.table","foreach","doParallel")
-load_libs(pckgs)
+load_pkg(pckgs)
 
 # ---------------- #
 # Global Variables 
