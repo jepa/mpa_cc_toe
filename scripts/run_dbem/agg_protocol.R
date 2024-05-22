@@ -2,8 +2,8 @@
 # Load required functions
 library(here)
 
-source(here("functions/function_list.R")) # Load a bunch of packages
-source(here("functions/agg_fx.R")) # Aggregstes data for FishMip
+source(here("Functions/function_list.R")) # Load a bunch of packages
+source(here("Functions/agg_fx.R")) # Aggregstes data for FishMip
 
 # Load packages
 pckgs <- c("tidyverse","data.table","foreach","doParallel")
