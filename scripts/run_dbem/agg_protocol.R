@@ -13,7 +13,7 @@ load_pkg(pckgs)
 # Global Variables 
 # ---------------- #
 
-variables <- c("Abd")
+variables <- c("Catch")
 
 # Scenario to call (Note this will derermine the results directory)
 scen <- "c6fgdl85f1mpatest"
