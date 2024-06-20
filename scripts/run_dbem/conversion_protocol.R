@@ -20,7 +20,7 @@ endyr <- 2100
 scen <- "c6gfdl26f1mpanow"
 
 # Include here the path of your DBEM raw outputs BEFORE the scenario
-dbem_outputs <- list.files(paste0("",scen),full.names = T)
+dbem_outputs <- list.files("/home/jepa/scratch/Results/c6gfdl26f1mpanow/")
 
 # Load required functions
 # source(here("support_fx/convert_fx.R")) # Load a bunch of packages
