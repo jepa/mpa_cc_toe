@@ -1,0 +1,21 @@
+forrtl: Input/output error
+forrtl: severe (38): error during write, unit 1, file /home/jepa/scratch/Results/c6gfdl26f1mpanow/605066/605066Abd1964.txt
+Image              PC                Routine            Line        Source             
+DBEM_v2_y          000000000045960C  Unknown               Unknown  Unknown
+DBEM_v2_y          000000000041DF2F  Unknown               Unknown  Unknown
+DBEM_v2_y          000000000040D958  Unknown               Unknown  Unknown
+DBEM_v2_y          000000000040434D  Unknown               Unknown  Unknown
+libc.so.6          00002B95E046594A  Unknown               Unknown  Unknown
+libc.so.6          00002B95E0465A05  __libc_start_main     Unknown  Unknown
+DBEM_v2_y          0000000000404261  Unknown               Unknown  Unknown
+forrtl: severe (28): CLOSE error, unit 1, file "Unknown"
+Image              PC                Routine            Line        Source             
+DBEM_v2_y          0000000000426AF1  Unknown               Unknown  Unknown
+DBEM_v2_y          000000000042798A  Unknown               Unknown  Unknown
+DBEM_v2_y          000000000045960C  Unknown               Unknown  Unknown
+DBEM_v2_y          000000000041DF2F  Unknown               Unknown  Unknown
+DBEM_v2_y          000000000040D958  Unknown               Unknown  Unknown
+DBEM_v2_y          000000000040434D  Unknown               Unknown  Unknown
+libc.so.6          00002B95E046594A  Unknown               Unknown  Unknown
+libc.so.6          00002B95E0465A05  __libc_start_main     Unknown  Unknown
+DBEM_v2_y          0000000000404261  Unknown               Unknown  Unknown
