@@ -7,7 +7,7 @@ library(here)
 library(tidyverse)
 
 # Variables to be converted (Abundace or Catch)
-variables <- c("Abd")
+category <- c("Abd")
 
 # Partial fix for not working species
 # spplist <- dplyr::filter(spplist, V1 %in% c("603310","604708"))
@@ -17,20 +17,23 @@ stryr <- 1851
 endyr <- 2100
 
 # Scenario to call (Note this will determine the results directory)
-scen <- "c6gfdl26f1mpanow"
+scenario <- "c6gfdl26f1mpanow"
 
 # Include here the path of your DBEM raw outputs BEFORE the scenario
-dbem_outputs <- list.files("~/scratch/Results/c6gfdl26f1mpanow/")
+taxon_list <- list.files("~/scratch/Results/c6gfdl26f1mpanow/",full.names = F)
+
+# path to save R data
+r_path <- "~/scratch/Results/R/"#output_path
 
 # Load required functions
-# source(here("support_fx/convert_fx.R")) # Load a bunch of packages
-source("~/projects/def-wailung/jepa/dbem/support_fx/convert_fx.R")
+source("~/projects/def-wailung/jepa/dbem/support_fx/txt_to_rdata_fx.R")
+
 
 # Call function for scenarios in Settings file
-lapply(variables,
-       convert_fx,
+lapply(taxon_list, 
+       dbem_txt_to_rdata, 
        year_one = stryr,
        year_end = endyr,
-       scen = scen,
-       csv_path = dbem_outputs
-)
+       scenario = scenario,
+       output_path = r_path,
+       category = category)
