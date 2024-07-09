@@ -13,8 +13,8 @@ category <- c("Abd")
 # spplist <- dplyr::filter(spplist, V1 %in% c("603310","604708"))
 
 # Determine the start and end year you want to include
-stryr <- 1851
-endyr <- 2100
+year_one <- 1851
+year_end <- 2100
 
 # Scenario to call (Note this will determine the results directory)
 scenario <- "c6gfdl26f1mpanow"
@@ -32,8 +32,8 @@ source("~/projects/def-wailung/jepa/dbem/support_fx/txt_to_rdata_fx.R")
 # Call function for scenarios in Settings file
 lapply(taxon_list, 
        txt_to_rdata, 
-       year_one = stryr,
-       year_end = endyr,
+       stryr = year_one,
+       endyr = year_end,
        scenario = scenario,
        output_path = r_path,
        category = category)
