@@ -31,7 +31,7 @@ source("~/projects/def-wailung/jepa/dbem/support_fx/txt_to_rdata_fx.R")
 
 # Call function for scenarios in Settings file
 lapply(taxon_list, 
-       dbem_txt_to_rdata, 
+       txt_to_rdata, 
        year_one = stryr,
        year_end = endyr,
        scenario = scenario,
