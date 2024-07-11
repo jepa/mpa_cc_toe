@@ -10,16 +10,16 @@ load_pkg <- function(pkg_list){
 }
 
 
-load_dbem <- function(scenario, cat = "Catch"){
+# Load raw DBEM data
+load_dbem <- function(scenario, cat = "Catch", taxon_key){
   
-  # List of modeled species
-  files_to_read <- list.files(MyFunctions::my_path("D","Raw/",scenario),pattern = cat)
+  files_to_read <- paste0(taxon_key,cat,".RData")
   
   
   for(s in 1:length(files_to_read)){
   # for(s in 1:5){
     
-    load(paste0("/Users/jepa88/Library/CloudStorage/OneDrive-UBC/Data/mpa_cc_toe/Data/Raw/",scenario,"/",files_to_read[s]))
+    load(paste0("/Users/jepa88/Library/CloudStorage/OneDrive-UBC/Data/mpa_cc_toe/data/raw/",scenario,"/",files_to_read[s]))
     
     taxon <- str_sub(files_to_read[s],1,6)
     print(taxon)
