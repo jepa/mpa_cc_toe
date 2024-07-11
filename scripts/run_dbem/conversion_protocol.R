@@ -5,9 +5,10 @@
 # Load required functions
 library(here)
 library(tidyverse)
+library(doParallel)
 
 # Variables to be converted (Abundace or Catch)
-category <- c("Abd")
+category <- c("Catch")
 
 # Partial fix for not working species
 # spplist <- dplyr::filter(spplist, V1 %in% c("603310","604708"))
@@ -29,11 +30,26 @@ r_path <- "~/scratch/Results/R/"#output_path
 source("~/projects/def-wailung/jepa/dbem/support_fx/txt_to_rdata_fx.R")
 
 
-# Call function for scenarios in Settings file
-lapply(taxon_list, 
-       txt_to_rdata, 
-       stryr = year_one,
-       endyr = year_end,
-       scenario = scenario,
-       output_path = r_path,
-       category = category)
+# # Call function for scenarios in Settings file
+# lapply(taxon_list, 
+#        txt_to_rdata, 
+#        stryr = year_one,
+#        endyr = year_end,
+#        scenario = scenario,
+#        output_path = r_path,
+#        category = category)
+
+# Call function for scenarios in Settings file using parallel computation
+
+# Use the environment variable SLURM_CPUS_PER_TASK to set the number of cores.
+# This is for SLURM. Replace SLURM_CPUS_PER_TASK by the proper variable for your system.
+# Avoid manually setting a number of cores.
+ncores = Sys.getenv("SLURM_CPUS_PER_TASK") 
+
+registerDoParallel(cores=ncores)# Shows the number of Parallel Workers to be used
+print(ncores) # this how many cores are available, and how many you have requested.
+getDoParWorkers()# you can compare with the number of actual workers
+
+# be careful! foreach() and %dopar% must be on the same line!
+foreach(taxon_list, .combine=rbind) %dopar% {txt_to_rdata(stryr = year_one,endyr = year_end,scenario = scenario,output_path = r_path,category = category)}
+
