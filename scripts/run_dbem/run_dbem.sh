@@ -7,7 +7,7 @@
 #SBATCH -t 01-10:00:00
 #SBATCH --mail-user=j.palacios@oceans.ubc.ca
 #SBATCH --mail-type=ALL
-#SBATCH --array=10-10
+#SBATCH --array=10-13
 #SBATCH --output=./slurm_out/Array-%A-%a.out
 #SBATCH --error=./slurm_out/Array-%A-%a.err
 
