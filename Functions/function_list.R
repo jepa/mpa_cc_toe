@@ -10,19 +10,15 @@ load_pkg <- function(pkg_list){
 }
 
 
-# Load raw DBEM data
 load_dbem <- function(scenario, cat = "Catch", taxon_key){
   
-  files_to_read <- paste0(taxon_key,cat,".RData")
-  
-  
-  for(s in 1:length(files_to_read)){
+  for(s in 1:length(taxon_key)){
   # for(s in 1:5){
     
-    load(paste0("/Users/jepa88/Library/CloudStorage/OneDrive-UBC/Data/mpa_cc_toe/data/raw/",scenario,"/",files_to_read[s]))
+    load(paste0("/Users/jepa88/Library/CloudStorage/OneDrive-UBC/Data/mpa_cc_toe/data/raw/",scenario,"/",taxon_key[s]))
     
-    taxon <- str_sub(files_to_read[s],1,6)
-    print(taxon)
+    taxon <- str_sub(taxon_key[s],1,6)
+    # print(taxon)
     
     mpa_df <- as.data.frame(data)
     colnames(mpa_df) <- seq(1851,2100,1)
