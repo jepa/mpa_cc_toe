@@ -2,7 +2,7 @@
  CCSc C6GFDL26                                
  SSP SSP126                                  
  rsfile RunSppList          
- rpath c6gfdl26f1mpanow              
+ rpath c6gfdl26f1mpanowb              
  tpath TaxonDataC0                   
  ifile 10                  
  FHS    1.00
