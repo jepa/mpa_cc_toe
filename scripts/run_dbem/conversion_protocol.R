@@ -51,5 +51,5 @@ print(ncores) # this how many cores are available, and how many you have request
 getDoParWorkers()# you can compare with the number of actual workers
 
 # be careful! foreach() and %dopar% must be on the same line!
-foreach(taxon_list, .combine=rbind) %dopar% {txt_to_rdata(tkey = taxon_list, stryr = year_one,endyr = year_end,scenario = scenario,output_path = r_path,category = category)}
+foreach(tkey = taxon_list, .combine="c") %dopar% {txt_to_rdata(tkey, stryr = year_one, endyr = year_end, scenario = scenario, output_path = r_path, category = category)}
 
