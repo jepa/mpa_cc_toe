@@ -257,14 +257,41 @@ load_dbem("c6gfdl26f1mpanow",taxon_key = "600464Abd.RData")
 
 ```{r}
 
-data <- list.files(MyFunctions::my_path("D","raw/","600004"),full.names = T,pattern = "Abd")
+# htotal_btm
+# htotal_surf
+# O2_btm
 
-bind_rows(
+data <- list.files(MyFunctions::my_path("G","climate/cmip6/C6GFDL26"),full.names = T,pattern = "htotal_surf")
+
+data_load <- bind_cols(
   lapply(data, read.table)
-  ) %>% 
-  pull(V2) %>% 
-  max(na.rm = T)
+  ) 
+
+colnames(data_load) <- seq(1850,2100,1)
+
+data_load %>%   
+  gather() %>% 
+  mutate(key = as.numeric(gsub("[A-Za-z]", "", key))) %>% 
+  filter(value > -100) %>% 
+  group_by(key) %>% 
+  summarise(mean = mean(value,na.rm =T)) %>% 
+  ggplot() +
+  geom_line(
+    aes(
+      x = key,
+      y = mean
+    )
+  )
   
   
 ```
+
+
+
+
+
+
+
+
+
 
