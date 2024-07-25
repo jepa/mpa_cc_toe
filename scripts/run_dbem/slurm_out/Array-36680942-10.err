@@ -1,0 +1,2 @@
+/localscratch/spool/slurmd/job36680953/slurm_script: line 22: 1792229 Killed                  ~/projects/def-wailung/jepa/dbem/dbem_scripts/DBEM_v2_y
+slurmstepd: error: Detected 1 oom_kill event in StepId=36680953.batch. Some of the step tasks have been OOM Killed.
